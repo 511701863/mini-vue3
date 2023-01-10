@@ -1,0 +1,22 @@
+.van-dialog__button .van-button{
+  color: #000000 !important;
+}
+.van-popup--bottom.van-popup--round,.van-popup{
+  border-radius: 0 !important;
+}
+.van-nav-bar__left .van-icon-arrow-left{
+  color: #000000 !important;
+  font-size: 40rpx !important;
+  font-weight: 500;
+}
+
+.van-hairline, .van-hairline--bottom, .van-hairline--left, .van-hairline--right, .van-hairline--surround, .van-hairline--top, .van-hairline--top-bottom {
+  position: static !important;
+}
+
+.van-fade-enter-active, .van-fade-leave-active{
+  z-index: 99 !important;
+}
+.label-class, .van-radio__label, .van-radio__label--right{
+  font-size: 24rpx;
+}

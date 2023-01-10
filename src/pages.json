@@ -1,0 +1,114 @@
+{
+  "pages": [
+    {
+      "path": "pages/control/index",
+      "name": "control",
+      "style": {
+        "navigationBarTitleText": "爱车",
+				"navigationBarBackgroundColor":"#FFFFFF",
+				"navigationBarTextStyle":"black",
+				"backgroundColor":"#EAECF3",
+				"navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/common/testTracker/index",
+      "name": "airControl",
+      "style": {
+        "navigationBarBackgroundColor":"#e1e7f0",
+        "navigationBarTitleText": "空调"
+      }
+    },
+    {
+      "path": "pages/my/index",
+      "name": "my",
+      "style": {
+        "navigationBarTitleText": "我的"
+      }
+    },
+    {
+      "path": "pages/car/index",
+      "name": "car",
+      "style": {
+        "navigationBarTitleText": "电子围栏"
+      }
+    },
+    {
+      "path": "pages/common/register/index",
+      "name": "register",
+      "navigationStyle": "custom",
+      "style": {
+        "navigationBarTitleText": "注册"
+      }
+    },
+    {
+      "path": "pages/common/baseH5/index",
+      "name": "baseH5"
+    },
+    {
+      "path": "pages/common/scrm/dealer",
+      "name": "dealer",
+      "style": {
+        "navigationBarTitleText": "选择经销商"
+      }
+    }
+  ],
+  "tabBar": {
+    "color": "#060606",
+    "selectedColor": "#000000",
+    "backgroundColor": "#FFFFFF",
+    "list": [
+      {
+        "pagePath": "pages/control/index",
+        "iconPath": "static/carIcon/tab3.png",
+        "selectedIconPath": "static/carIcon/tab3_select.png",
+        "text": "爱车"
+      },
+      {
+        "pagePath": "pages/my/index",
+        "iconPath": "static/carIcon/tab5.png",
+        "selectedIconPath": "static/carIcon/tab5_select.png",
+        "text": "我的"
+      }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8",
+    "usingComponents": {
+      "van-image": "./wxcomponents/vant/image/index",
+      "van-button": "./wxcomponents/vant/button/index",
+      "van-index-bar": "./wxcomponents/vant/index-bar/index",
+      "van-index-anchor": "./wxcomponents/vant/index-anchor/index",
+      "van-cell": "./wxcomponents/vant/cell/index",
+      "van-cell-group": "./wxcomponents/vant/cell-group/index",
+      "van-tab": "./wxcomponents/vant/tab/index",
+      "van-tabs": "./wxcomponents/vant/tabs/index",
+      "van-search": "./wxcomponents/vant/search/index",
+      "van-overlay": "./wxcomponents/vant/overlay/index",
+      "van-field": "./wxcomponents/vant/field/index",
+      "van-popup": "./wxcomponents/vant/popup/index",
+      "van-dialog": "./wxcomponents/vant/dialog/index",
+      "van-uploader": "./wxcomponents/vant/uploader/index",
+      "van-action-sheet": "./wxcomponents/vant/action-sheet/index",
+      "van-rate": "./wxcomponents/vant/rate/index",
+      "van-nav-bar": "./wxcomponents/vant/nav-bar/index",
+      "van-radio": "./wxcomponents/vant/radio/index",
+      "van-radio-group": "./wxcomponents/vant/radio-group/index",
+      "van-slider": "./wxcomponents/vant/slider/index",
+      "van-stepper": "./wxcomponents/vant/stepper/index",
+      "van-checkbox": "./wxcomponents/vant/checkbox/index",
+      "van-checkbox-group": "./wxcomponents/vant/checkbox-group/index",
+      "van-area":"./wxcomponents/vant/area/index",
+      "van-tag":"./wxcomponents/vant/tag/index",
+      "van-switch": "./wxcomponents/vant/switch/index",
+      "van-datetime-picker": "./wxcomponents/vant/datetime-picker/index",
+      "van-picker": "./wxcomponents/vant/picker/index",
+      "van-dropdown-menu": "./wxcomponents/vant/dropdown-menu/index",
+      "van-dropdown-item": "./wxcomponents/vant/dropdown-item/index",
+      "van-icon": "./wxcomponents/vant/icon/index"
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "vue3 template": {
+      "prefix": "vue3",
+      "body": [
+        "<script setup lang=\"ts\">",
+        "</script>",
+        "",
+        "<template>",
+        "  <view>",
+        "    ${1}",
+        "  </view>",
+        "</template>",
+        ""
+    ],
+  },
+  "vue3 props": {
+  "prefix": "vue3 with props",
+  "body": [
+    "<script setup lang=\"ts\">",
+    "",
+    "interface Props{",
+    "  name: string",
+    "}",
+    "",
+    "const props = withDefaults(defineProps<Props>(), {",
+    "  name: 'name'",
+    "});",
+    "",
+    "</script>",
+    "",
+    "<template>",
+    "  <view>",
+    "    {{ props.name }}",
+    "  </view>",
+    "</template>",
+    ""
+    ]
+  },
+  "vue3 emit": {
+    "prefix": "vue3 with emit",
+    "description": "",
+    "body": [
+      "<script setup lang=\"ts\">",
+      "",
+      "type Status = 'open' | 'close';",
+      "",
+      "interface Emits {",
+      "  (e: 'handle', status: Status): void;",
+      "}",
+      "const emit = defineEmits<Emits>();",
+      "",
+      "</script>",
+      "",
+      "<template>",
+      "  <view @click=\"emit('handle','open')\">",
+      "    ${1}",
+      "  </view>",
+      "</template>",
+      ""
+    ]
+  },
+  "vue3 router": {
+    "prefix": "vue3 with router",
+    "description": "",
+    "body": [
+      "<script setup lang=\"ts\">",
+      "import { useRouter } from '@/router/router';",
+      "",
+      "const router = useRouter();",
+      "",
+      "function navigateToByName(name: string){",
+      "  router.navigateTo({name});",
+      "}",
+      "</script>",
+      "",
+      "<template>",
+      "  <view>",
+      "    <button",
+      "      class=\"button-primary\"",
+      "      @click=\"navigateToByName('${1}')\"",
+      "    >",
+      "      跳转页面",
+      "    </button>",
+      "  </view>",
+      "</template>",
+      ""
+    ]
+  }
+}

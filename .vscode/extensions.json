@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "vue.volar",
+    "dbaeumer.vscode-eslint",
+    "shd101wyy.markdown-preview-enhanced",
+    "editorconfig.editorconfig",
+    "antfu.unocss",
+    "christian-kohler.path-intellisense",
+    "naumovs.color-highlight"
+  ]
+}

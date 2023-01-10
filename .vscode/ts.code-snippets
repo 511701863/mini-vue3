@@ -1,0 +1,19 @@
+{
+  "tracker": {
+    "prefix": "tracker",
+    "description": "QDTracker event",
+    "body": [
+      "import { trackEvent } from '../types';",
+      "",
+      "const $1: trackEvent = {",
+      "  eventName: '$1',",
+      "  params: {",
+      "",
+      "  }",
+      "};",
+      "",
+      "export default $1;",
+      ""
+    ]
+  }
+}
