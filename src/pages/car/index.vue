@@ -12,7 +12,7 @@ import { TextData, Path, markersData } from './type';
 
 let myAmapFun = new AMap.AMapWX({ key: 'cf893f474862b6533054310120072d17' });
 const latitude: Ref<number> = ref(0);
-const longitude: Ref<number> = ref(0);
+const longitude: Ref<number> = ref(1);
 const markLength:Ref<number> = ref(0.5);
 const state = reactive({
   textData: {} as TextData,
