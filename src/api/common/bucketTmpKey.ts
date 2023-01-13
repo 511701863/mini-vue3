@@ -1,4 +1,4 @@
-import { post } from '@/utils/request';
+import {post, get} from '@/http/index';
 
 /**
  * CosTmpKeyRequest

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useRouter } from '@/router/router';
-import { onMounted, ref, reactive } from 'vue';
+import { onMounted, ref, reactive, watchEffect, watch, isRef, computed } from 'vue';
 import { CarInfo, controlItem } from './type';
 import { useRequest } from '../../hooks/useRequest/useRequst';
-import {getList} from '@/api/car/index';
+import { getList, getList2 } from '@/api/car/index';
+import { debounce } from '../../utils/tool/index';
 
 const router = useRouter();
 const swiperIndex = ref<number>(0);
@@ -78,11 +79,39 @@ const btnList = ref<controlItem[]>([{
   name: '发动机'
 }
 ]);
-const { run, data = [] } = useRequest<any, any>(getList, {
+type GetBanner = Array<{ type: string }>
+type GetBannerParams = {
+  name: string;
+}
+// getList2<GetBannerParams, GetBanner>({ name: '12345' }).then((res) => {
+//   console.log(res[0].type);
+// });
+// function getUsername(): Promise<any> {
+// 	return new Promise((resolve, reject) => {
+// 		setTimeout(() => {
+// 			resolve(`${String(Date.now())}`);
+// 		}, 1000);
+// 	});
+// }
+const number = ref('test');
+
+const { run, data} = useRequest<GetBanner, GetBannerParams[]>(getList2, {
   manual: true
 });
-onMounted(() => {
+watch(data, (n) => {
+  const num = data.value ?? [];
+  number.value = 'build';
+  console.log(num);
 });
+const { run: run2, data: data2} = useRequest<GetBanner, GetBannerParams[]>(getList, {
+  manual: false,
+  defaultParmas:[{name:'3333'}],
+  refreshDeps:[() => number],
+  refreshDepsParams:computed(() => [{name:'12345'}])
+});
+
+// onMounted(() => {
+// });
 function confirm(i: any) {
   state.carInfo = carList.value.find((item) => item.value === i.detail.value) as CarInfo;
 }
@@ -98,6 +127,7 @@ function clickTab(e: any) {
 function changeSwiper(e: any) {
   let current = e.detail.current;
   swiperIndex.value = current;
+  run({ name: 'kkkk' });
 }
 
 function changeBottomSwiper(e: any) {
@@ -117,7 +147,7 @@ function changeBottomSwiper(e: any) {
 // }
 
 function clickControl(item: controlItem) {
-  run({name:'1234'});
+  // run2({ name: '12345' });
   item.check = !item.check;
 }
 function goToAir() {

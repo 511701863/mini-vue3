@@ -1,4 +1,4 @@
-import { ComputedRef, WatchSource } from 'vue';
+import { ComputedRef, WatchSource, Ref } from 'vue';
 
 export interface Response<T> {
   status: number;
@@ -38,16 +38,21 @@ export interface Options<T, P extends any[]> {
 
   // 失败回调
   onError?: (err: HttpError, params: P) => void;
+
+  //是否启用loading
+  // loading?:boolean;
 }
 
 export interface Result<T = any> {
-  data?: T | null;
+  data: T | null;
   loading?: boolean;
   cancel?: any;
   err?: HttpError;
 }
 
 declare global {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
   interface Promise{
     cancel: any;
   }

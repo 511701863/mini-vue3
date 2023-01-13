@@ -1,4 +1,4 @@
-import { get, post } from '@/utils/request';
+import {post, get} from '@/http/index';
 
 export async function getBanner() {
   return get({

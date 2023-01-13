@@ -1,5 +1,5 @@
 import { appid } from '@/config';
-import { post } from '@/utils/request';
+import {post, get} from '@/http/index';
 
 export function register(detail: any) {
   return post(

@@ -60,14 +60,14 @@
     "list": [
       {
         "pagePath": "pages/control/index",
-        "iconPath": "static/carIcon/tab3.png",
-        "selectedIconPath": "static/carIcon/tab3_select.png",
+        "iconPath": "static/images/car/tab3.png",
+        "selectedIconPath": "static/images/car/tab3_select.png",
         "text": "爱车"
       },
       {
         "pagePath": "pages/my/index",
-        "iconPath": "static/carIcon/tab5.png",
-        "selectedIconPath": "static/carIcon/tab5_select.png",
+        "iconPath": "static/images/car/tab5.png",
+        "selectedIconPath": "static/images/car/tab5_select.png",
         "text": "我的"
       }
     ]

@@ -1,4 +1,5 @@
-// import { RequestParams } from '@/utils/request/types';
+// import { RequestParams } from 'import {post, get} from '@/http/index';
+/types';
 type Get<T extends Record<PropertyKey, any>, K> = K extends keyof T ? T[K] : K extends `${infer F}.${infer R}` ? (F extends keyof T ? Get<T[F], R> : never) : never;
 interface Page {
   /**

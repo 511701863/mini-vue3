@@ -1,4 +1,4 @@
-import { get } from '@/utils/request';
+import {post, get} from '@/http/index';
 
 interface Area {
   areaId:number,

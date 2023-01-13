@@ -33,15 +33,13 @@ export function useRequest<T, P extends any[] = any[]>(
     if (!queryKey && repeatCancel) {
       querise[key].cancel?.();
     }
-
     querise[key].loading = true;
-
     const instance = service(...args);
     querise[key].cancel = instance.cancel;
 
     instance
       .then((res) => {
-        querise[key].data = res.data.data;
+        querise[key].data = res.data;
         // 请求成功时清空之前的错误信息
         querise[key].err = undefined;
         if (typeof options.onSuccess === 'function') {
@@ -64,7 +62,7 @@ export function useRequest<T, P extends any[] = any[]>(
   // 依赖更新
   if (refreshDeps) {
     watch(refreshDeps, () => {
-      run(...(refreshDepsParams?.value || ([] as unknown as P)));
+      serviceFn(...(refreshDepsParams?.value || ([] as unknown as P)));
     }, { deep: true });
   }
 
@@ -72,7 +70,6 @@ export function useRequest<T, P extends any[] = any[]>(
   if (!manual) {
     run(...defaultParmas);
   }
-
   return {
     run,
     querise,

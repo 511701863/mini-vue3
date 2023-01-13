@@ -1,4 +1,4 @@
-import { get } from '@/utils/request';
+import {post, get} from '@/http/index';
 
 export async function getDealerList(data: Scrm.DealerReq) {
   return get<Scrm.DealerRes>(
