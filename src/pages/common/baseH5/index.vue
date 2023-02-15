@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { getEnv } from '@/config';
 import { onLoad, onShareAppMessage} from '@dcloudio/uni-app';
 import { ref } from 'vue';
+import { useConfig } from '../../../store/modules/config';
+
+const {getBaseH5} = useConfig();
 
 let cookie = uni.getStorageSync('COOKIE');
 let userId = uni.getStorageSync('userId');
@@ -20,9 +22,6 @@ const onMessage = (e: any) => {
     isHelp = true;
   }
 };
-uni.enableAlertBeforeUnload({
-  message: '确定离开此页面？'
-});
 onShareAppMessage((shareOpt) => {
   console.log('分享', shareOpt);
   const promise = new Promise((resolve, rej) => {
@@ -36,13 +35,13 @@ onShareAppMessage((shareOpt) => {
 });
 onLoad((e: any) => {
   const { path, ...query } = e;
-  src.value = getEnv().baseH5 + '/#' + path + '?';
+  src.value = getBaseH5() + path + '?';
   activityId.value = query.activityId || '';
   for (let key in query) {
     src.value += key + '=' + query[key] + '&';
   }
 
-  src.value += 'cookie' + '=' + cookie;
+  // src.value += 'cookie' + '=' + cookie;
 });
 </script>
 

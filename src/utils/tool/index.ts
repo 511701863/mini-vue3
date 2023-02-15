@@ -110,3 +110,16 @@ export function timeFromNow(time: dayjs.ConfigType) {
 export function toNumber(price: number | string | undefined) {
   return parseInt(price as string) || 0;
 }
+
+//去重
+export function uniqueFunc(arr:any[], uniId:any){
+  const hash = {};
+  return arr.reduce((accum, item) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line no-unused-expressions
+    hash[item[uniId]] ? '' : hash[item[uniId]] = true && accum.push(item);
+    return accum;
+  }, []);
+}
+

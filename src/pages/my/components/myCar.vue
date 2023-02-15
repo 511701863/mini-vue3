@@ -1,98 +1,87 @@
 <script setup lang="ts">
-import Dialog from '@/wxcomponents/vant/dialog/dialog';
+import { ref } from 'vue';
+import { onShow } from '@dcloudio/uni-app';
+
+import { RoutesNamesType } from '../../../router/types';
+
 import nxImage from '@/components/nxImage/nxImage.vue';
-import { onMounted, ref } from 'vue';
 import { useRouter } from '@/router/router';
 const router = useRouter();
-
-const carLists = ref([]);
-const defaultCar=ref();
-async function fncarList(pageIndex: number) {
-  const params = {
-    userName: '18717380379' || uni.getStorageSync('userInfo').phone,
-    // userName: '19828478257',
-    pageIndex: pageIndex,
-    pageSize: 50
-  };
-  const result:any = {};
-  // if(result && result.dataList.length > 0){
-  //   uni.setStorageSync('hasCar', true);
-  //   result.dataList.forEach((item: any) => {
-  //     if (item.status === 'default') {
-  //       defaultCar.value=item;
-  //     }
-  //   });
-  //   carLists.value.push(...result.dataList);
-  // }else{
-  //   uni.setStorageSync('hasCar', false);
-  // }
-}
-
-onMounted(() => {
-  fncarList(1);
+const isLogin = ref(false);
+onShow(() => {
+  isLogin.value = uni.getStorageSync('isLogin');
 });
+function clickIcon(name:RoutesNamesType){
+  if (!isLogin.value) {
+    router.navigateTo({
+      name: 'login'
+    });
+    return;
+  }
+  router.navigateTo({
+      name
+    });
+}
 </script>
 
 <template>
-  <van-dialog id="van-dialog" confirm-button-color="#376C80" />
-
-  <view v-if="carLists.length===0" class="relative m-t-16rpx" @click="router.navigateTo({ name: 'addCarSelect' });">
-    <view>
-      <nxImage
-        static="my-bg-car.png"
-        width="670rpx"
-        height="260rpx"
-      />
+  <view class="bg-white rounded-16rpx">
+    <view class="h-30rpx p-32rpx text-titleLarge font-600 pb-0">
+      我的车辆
     </view>
-    <view class="absolute bottom-82rpx left-48rpx">
-      <view class="w-160rpx h-60rpx bg-white text-titleMeduim text-center leading-60rpx">
-        添加爱车
+    <view class="flex-between p-y-42rpx p-x-48rpx">
+      <view class="text-center" @click="clickIcon('carManagement')">
+        <nx-image
+          src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/management.png"
+          width="48rpx"
+          height="48rpx"
+        />
+        <view class="text-titleSmall text-center">
+          车辆管理
+        </view>
       </view>
-      <view class="text-meduim color-whiteText m-t-24rpx">
-        添加爱车即享专属权益
+      <view class="text-center" @click="clickIcon('pinConfig')">
+        <nx-image
+          src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/pin.png"
+          width="48rpx"
+          height="48rpx"
+        />
+        <view class="text-titleSmall text-center">
+          PIN码设置
+        </view>
+      </view>
+      <view class="text-center" @click="clickIcon('electronic')">
+        <nx-image
+          src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/electronic.png"
+          width="48rpx"
+          height="48rpx"
+        />
+        <view class="text-titleSmall text-center">
+          电子围栏
+        </view>
+      </view>
+      <view class="text-center" @click="clickIcon('maintenance')">
+        <nx-image
+          src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/weibao.png"
+          width="48rpx"
+          height="48rpx"
+        />
+        <view class="text-titleSmall text-center">
+          我的维保
+        </view>
+      </view>
+    </view>
+    <view class="flex-between p-b-42rpx p-x-48rpx">
+      <view class="text-center" @click="clickIcon('message')">
+        <nx-image
+          src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/message.png"
+          width="48rpx"
+          height="48rpx"
+        />
+        <view class="text-titleSmall text-center">
+          消息中心
+        </view>
       </view>
     </view>
   </view>
-  <view v-else class="m-t-16rpx bg-white shadow h-220rpx p-24rpx">
-    <view class="flex-between">
-      <view class="text-titleLarge font-600">
-        {{ defaultCar.nickName }}
-      </view>
-      <view class="text-titleSmall color-secondaryText" @click="router.navigateTo({name:'myCarList'})">
-        车辆管理
-      </view>
-    </view>
-    <view class="flex-between m-t-30rpx">
-      <view class="text-titleSmall">
-        <view>{{ defaultCar.licensePlate }}</view>
-        <view>{{ defaultCar.brandName }}</view>
-      </view>
-      <view>
-        <nxImage :src="defaultCar.modelImageUrl" width="260rpx" height="114rpx" />
-      </view>
-    </view>
-  </view>
-  <!-- <swiper v-else class="h-220rpx" :indicator-dots="true">
-    <swiper-item v-for="item in carLists" :key="item + '1'">
-      <view class="m-t-16rpx bg-white shadow h-220rpx p-24rpx">
-        <view class="flex-between">
-          <view class="text-titleLarge font-600">
-            {{ item.nickName }}
-          </view>
-          <view class="text-titleSmall color-secondaryText" @click="router.navigateTo({name:'myCarList'})">
-            车辆管理
-          </view>
-        </view>
-        <view class="flex-between m-t-30rpx">
-          <view class="text-titleSmall">
-            <view>{{ item.licensePlate }}</view>
-            <view>{{ item.brandName }}</view>
-          </view>
-          <view>
-            <nxImage :src="item.modelImageUrl" width="260rpx" height="114rpx" />
-          </view>
-        </view>
-      </view>
-    </swiper-item>
-  </swiper> -->
 </template>

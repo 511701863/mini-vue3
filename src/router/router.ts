@@ -39,7 +39,7 @@ export function createRouter(options: RouterOptions) {
     const pages = getCurrentPages();
     const currentPage = pages[pages.length - 1];
     const to = getRoute(options);
-    const from = getRoute({ url: currentPage.route });
+    const from = getRoute({ url: currentPage.route as any });
     return {
       to: {
         ...to,

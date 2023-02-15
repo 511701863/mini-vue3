@@ -1,9 +1,11 @@
-import { getEnv } from '@/config';
 import { RequestOptions, ResponseData } from './types';
 import errorHandle from './errorHandle';
+import { useConfig } from '@/store/modules/config';
 
+const {getBaseUrl, config} = useConfig();
 type MethodType = UniNamespace.RequestOptions['method']
-
+//小程序冷启动时 获取storage里的数据来确定是什么环境  如果是初次进入 则使用默认的
+getBaseUrl();
 let requestNum = 0; // 请求次数
 let showLoading = false; // loading 状态
 function createRequest(method: MethodType) {
@@ -27,7 +29,7 @@ function createRequest(method: MethodType) {
         userId: 12345
       };
       uni.request({
-        url: getEnv().baseURL + options.url,
+        url: config.baseURL + options.url,
         data: options.data,
         method,
         header: Object.assign(header, options.header),

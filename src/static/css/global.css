@@ -30,6 +30,18 @@
 }
 
 button {
-  border-radius: 0 !important;
+  border-radius: 0 ;
   padding: 0;
+}
+::-webkit-scrollbar{
+  width: 0;
+  height: 0;
+  color: transparent;
+}
+button[disabled]{
+  background-color: #E3E3E3 !important;
+}
+
+button::after{
+  border: none!important;
 }

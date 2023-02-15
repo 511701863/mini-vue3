@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from '@dcloudio/uni-app';
 import qqmapsdk from '@/utils/sdk/qq-map-sdk/index';
-import { login } from '@/helper/login/index';
-import { QDinit } from '@/helper/tracker';
+import { useConfig } from '@/store/modules/config';
+// import { QDinit } from '@/helper/tracker';
 
-QDinit();
+// QDinit();
 // login();
-
 uni.getLocation({
   type: 'gcj02',
   success: (res) => {
@@ -18,7 +17,12 @@ uni.getLocation({
         longitude: res.longitude
       },
       success: function (res: any) {
+        console.log(res);
+
         uni.setStorageSync('city', res.result.ad_info.city);
+        uni.setStorageSync('addName', res.result.formatted_addresses.recommend);
+        uni.setStorageSync('provinceCode', res.result.ad_info.adcode.slice(0, 3)+'000');
+        uni.setStorageSync('province', res.result.ad_info.province);
         uni.setStorageSync('findCity', res.result.ad_info.city);
         uni.setStorageSync('address', res.result.address);
       },
@@ -35,9 +39,8 @@ uni.getLocation({
     });
   }
 });
-
 onLaunch(() => {
-  console.log('App Launch');
+  console.log('App onLaunch');
 });
 onShow(() => {
   console.log('App Show');

@@ -1,6 +1,6 @@
 /**
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 /**
  * 基础图片组件（支持静态和动态cos）
@@ -14,7 +14,7 @@ interface Props {
   src?: string,
   isCos?: boolean,
   static?: string | boolean,
-  previewList: any[]
+  previewList?: any[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -53,6 +53,10 @@ function preview(){
     });
   }
 }
+const showLoading = ref(true);
+function loadEnd(){
+  showLoading.value = false;
+}
 </script>
 
 <template>
@@ -63,9 +67,22 @@ function preview(){
       :fit="props.fit"
       :round="props.round"
       :src="src"
+      use-loading-slot
+      @load="loadEnd"
+      @error="loadEnd"
     />
     <view class="absolute w-full bottom-0 left-0 bg-mantle color-white">
       <slot></slot>
+    </view>
+    <view class="absolute w-full bottom-50% left-0 text-center">
+      <van-loading
+        v-if="showLoading"
+        slot="loading"
+        type="spinner"
+        size="20"
+        vertical
+        class="text-center"
+      />
     </view>
   </view>
 </template>

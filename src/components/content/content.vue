@@ -30,7 +30,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 <template>
   <view>
-    <view class="text-titleMeduim font-500">
+    <view class="text-titleMedium font-500">
       {{ props?.title }}
     </view>
     <view
@@ -62,28 +62,28 @@ const props = withDefaults(defineProps<Props>(), {
     <text
       v-for="item in props.modelList"
       :key="item.id"
-      class="bg-inputGray p-8rpx m-r-10rpx  text-meduim"
+      class="bg-inputGray p-8rpx m-r-10rpx  text-medium"
     >
       {{ item.name }}
     </text>
     <text
       v-for="item in props.questionTypeList"
       :key="item.questionType"
-      class="bg-inputGray p-8rpx m-r-10rpx  text-meduim"
+      class="bg-inputGray p-8rpx m-r-10rpx  text-medium"
     >
       {{ item.questionTypeName }}
     </text>
     <text
       v-for="item in props.relationClub"
       :key="item.id"
-      class="bg-inputGray p-8rpx m-r-10rpx  text-meduim"
+      class="bg-inputGray p-8rpx m-r-10rpx  text-medium"
     >
       {{ item.name }}
     </text>
     <text
       v-for="item in props.relationTopic"
       :key="item.id"
-      class="bg-inputGray p-8rpx m-r-10rpx  text-meduim"
+      class="bg-inputGray p-8rpx m-r-10rpx  text-medium"
     >
       {{ item.name }}
     </text>

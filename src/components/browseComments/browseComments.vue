@@ -1,9 +1,5 @@
 <!-- eslint-disable vue/require-default-prop -->
 <script setup lang="ts">
-/**
- 浏览评论时间展示组件
- author：张嘉伟
-*/
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -71,7 +67,7 @@ const answerClick=() => {
 </script>
 
 <template>
-  <view class="flex-between  m-t-16rpx  text-meduim">
+  <view class="flex-between  m-t-16rpx  text-medium">
     <view
       v-if="props?.createTime"
       class="color-secondaryText"

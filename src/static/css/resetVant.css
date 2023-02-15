@@ -2,7 +2,8 @@
   color: #000000 !important;
 }
 .van-popup--bottom.van-popup--round,.van-popup{
-  border-radius: 0 !important;
+  border-radius: 16rpx !important;
+  /* width: 686rpx !important; */
 }
 .van-nav-bar__left .van-icon-arrow-left{
   color: #000000 !important;
@@ -19,4 +20,60 @@
 }
 .label-class, .van-radio__label, .van-radio__label--right{
   font-size: 24rpx;
+}
+.van-field__label--disabled {
+  color: #000000 !important;
+}
+.van-field__label {
+  color: #000000 !important;
+}
+.van-field__control--disabled {
+  color: #262626 !important;
+}
+.van-cell{
+  padding-top: 32rpx !important;
+  padding-bottom: 32rpx !important;
+}
+.van-cell__value {
+  color:#c3c1c1!important;
+}
+.cell-content .van-cell__value {
+  color:#262626!important;
+}
+.van-tab{
+  line-height: 64rpx !important;
+}
+.van-tab--active {
+  font-weight: bold !important;
+}
+.van-tabs--line .van-tabs__wrap {
+  height: 64rpx !important;
+}
+.van-count-down {
+  color: #666 !important ;
+}
+.van-tabs__scroll--line {
+  background-color: #F8F9F9 !important;
+  height: 64rpx !important;
+}
+.van-icon--image {
+  width: 40rpx !important;
+  height: 40rpx !important;
+}
+.van-checkbox__icon {
+  border-radius: 4rpx !important;
+}
+.auth-page .van-cell {
+  background:#F8F9F9!important;
+}
+.auth-page .van-cell__value {
+  text-align:left!important;
+}
+.bind-car .van-cell__title{
+  font-weight: bold !important;
+  font-size: 32rpx;
+}
+.coll-form .van-cell__title{
+  font-weight: 400 !important;
+  font-size: 28rpx;
 }

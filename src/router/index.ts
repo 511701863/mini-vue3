@@ -1,4 +1,5 @@
 import { createRouter } from './router';
+import { pages, subPackages } from './routes/index';
 console.log(ROUTES);
 
 const routes = [...ROUTES];

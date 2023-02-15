@@ -1,10 +1,5 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-
-/**
- * 表单-下拉选择组件
- * author:颜必行
- */
  interface Options{
   name: string // 展示字段
   value: any // 映射字段
@@ -19,12 +14,14 @@ interface Props{
   label?: string,
   placeholder?: string,
   options: Options[],
+  border?:boolean,
   required?:boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: '',
   placeholder: '',
+  border:false,
   label: ''
 });
 
@@ -52,6 +49,7 @@ const content = computed(() => {
     is-link
     :value="content"
     :required="props.required"
+    :border="props.border"
     @click="show = true"
   />
   <van-action-sheet

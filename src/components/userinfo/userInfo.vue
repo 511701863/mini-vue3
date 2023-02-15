@@ -64,7 +64,7 @@ const userFollow = async (follow: number) => {
         </view>
         <view class="m-l-24rpx">
           <view class="flex ">
-            <view class="text-titleMeduim font-500">
+            <view class="text-titleMedium font-500">
               {{ props.userinfo?.nickname }}
             </view>
             <view class="m-l-8rpx">
@@ -93,7 +93,7 @@ const userFollow = async (follow: number) => {
         <slot>
           <view
             v-if="props.userinfo?.id !== userId"
-            class="w-126rpx h-60rpx text-center leading-60rpx border-stroke border-1rpx text-meduim"
+            class="w-126rpx h-60rpx text-center leading-60rpx border-stroke border-1rpx text-medium"
             @click="userFollow(props.userinfo?.follow as number)"
           >
             {{ props.userinfo?.follow === 1 ? '已关注' : '关注' }}
