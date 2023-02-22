@@ -41,7 +41,6 @@ watch(() => formData.end, (nVal) => {
       title:'结束时间不能小于开始时间',
       icon:'none'
     });
-    DatePickerEnd?.value?.clearContent();
     formData.end = '';
   }
 });

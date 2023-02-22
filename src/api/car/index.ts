@@ -2,7 +2,7 @@ import {post, get} from '@/http/index';
 
 export function getList<P=any, T=any>(data:P) {
   return get<T>({
-    url: '/tsp-bss/admin/model/list',
+    url: '/tsp-tpm/app/maintenance/getMaintenanceList',
     data,
     loading: false,
     loadingMask:true,

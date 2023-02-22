@@ -8,35 +8,76 @@ import NxSelect from '@/components/nxSelect/nxSelect.vue';
 import NxCheckBox from '@/components/nxCheckbox/index.vue';
 import nxImage from '@/components/nxImage/nxImage.vue';
 
-import { getList, getList2 } from '@/api/car/index';
+import { addMaintenance } from '@/api/my/maintenance';
+import { getCarList } from '@/api/my/carConfig';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
 import { useStore } from '../../store/modules/store';
 const router = useRouter();
 const {storeState} = useStore();
 const addFlag =ref(true);
-const formData:Record<string, any> = reactive({
-  name:'d',
-  center:'123',
-  start:'fff',
-  store:'ggg',
-  car:'111',
-  end:'bvvv',
-  phone:'1234',
-  type:[false, false]
+const {run} = useRequest<any, MyCenter.addMaintenance[]>(addMaintenance, {
+  manual:true,
+  onSuccess:(res) => {
+    console.log(res);
+    uni.showToast({
+        title:'预约成功'
+    });
+    router.navigateTo({name:'maintenanceDetail', query:{id:res.data}});
+  }
 });
+const {run:getCarListFn, data:carList} = useRequest<MyCenter.VehicleLoveList[]>(getCarList, {
+  manual:true
+});
+onLoad(() => {
+  getCarListFn();
+});
+const formData:{[key in keyof MyCenter.addMaintenance] : any} = reactive({
+  cellPhoneNumber:'',
+  customerName:'',
+  dealerCode:'',
+  planArriveDate:'',
+  planArriveTime:'',
+  vin:'LUYDTESTTENCENT01',
+  remark:'',
+  licensePlate:'',
+  store:'',
+  repairType:[true, false]
+});
+
 const submitDisabled = computed(() => {
   let flag = false;
   for (const key in formData) {
-    if(formData[key] === ''){
+    if(key!=='remark' && formData[key] === ''){
       flag = true;
     }
   }
   return flag;
 });
 onShow(() => {
-  formData.store = storeState.name || 'Ceshi';
+  formData.store = storeState.name || '';
+  formData.dealerCode = storeState.code || '';
 });
+function submit(){
+  console.log(formData);
+  const params = {
+    ...formData
+  };
+  //1：保养，2：维修
+  if(params.repairType[0]){
+    params.repairType = 2;
+  }else{
+    params.repairType = 1;
+  }
+  run(params);
+}
+function changeCheckBox(num:number){
+  formData.repairType = [false, false];
+  formData.repairType[num] = true;
+}
+function selectCar(e:any){
+  formData.licensePlate = e.name;
+}
 </script>
 
 <template>
@@ -57,29 +98,30 @@ onShow(() => {
             维保类型
           </div>
           <div class="flex justify-between">
-            <NxCheckBox v-model="formData.type[0]" checked-color="#1E1E1E" class="mr-52rpx" shape="square">
+            <NxCheckBox v-model="formData.repairType[0]" checked-color="#1E1E1E" class="mr-52rpx" shape="square" @change="changeCheckBox(0)">
               维修
             </NxCheckBox>
-            <NxCheckBox v-model="formData.type[1]" checked-color="#1E1E1E" class="mr-52rpx" shape="square">
+            <NxCheckBox v-model="formData.repairType[1]" checked-color="#1E1E1E" class="mr-52rpx" shape="square" @change="changeCheckBox(1)">
               保养
             </NxCheckBox>
           </div>
         </div>
-        <nxDatePicker v-model="formData.start" :min-date="new Date().getTime()+86400000" label="预约日期" type="date" placeholder="请选择日期" />
-        <nxDatePicker v-model="formData.end" label="预约时间" type="timeRange" placeholder="请选择时间段" />
+        <nxDatePicker v-model="formData.planArriveDate" :min-date="new Date().getTime()+60*60*24*1000" label="预约日期" type="date" placeholder="请选择日期" />
+        <nxDatePicker v-model="formData.planArriveTime" label="预约时间" type="timeRange" placeholder="请选择时间段" />
         <nx-select
-          v-model="formData.car"
-          :options="[]"
+          v-model="formData.vin"
+          :options="carList?.map(item=>{return { name:item.carLicense,value:item.vin }}) || []"
           label="车辆"
           placeholder="请选择车辆"
+          @change="selectCar"
         />
       </van-cell-group>
     </div>
     <div class="rounded-16rpx bg-white mt-48rpx">
       <van-cell-group>
-        <nxInput v-model="formData.name" label="姓名" placeholder="请选输入姓名" input-align="right" />
+        <nxInput v-model="formData.customerName" label="姓名" placeholder="请选输入姓名" input-align="right" />
         <nxInput
-          v-model="formData.name"
+          v-model="formData.cellPhoneNumber"
           label="手机"
           placeholder="请选输入手机"
           input-align="right"
@@ -90,7 +132,7 @@ onShow(() => {
           预约说明
         </div>
         <nxInput
-          v-model="formData.end"
+          v-model="formData.remark"
           type="textarea"
           show-word-limit
           :maxlength="50"
@@ -103,6 +145,7 @@ onShow(() => {
       <button
         :disabled="submitDisabled"
         class="bg-buttonColor w-686rpx h-100rpx text-32rpx lh-100rpx rounded-50rpx text-white"
+        @click="submit"
       >
         确定
       </button>

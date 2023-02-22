@@ -11,3 +11,4 @@ declare const ROUTES: any;
 
 declare module 'cos-wx-sdk-v5';
 declare module '*.js';
+declare module 'wxmp-rsa';

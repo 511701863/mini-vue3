@@ -3,12 +3,12 @@ import { ref, reactive, Ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 
 import ElectronicDiaLog from './components/ElectronicDiaLog.vue';
+import nxImage from '@/components/nxImage/nxImage.vue';
+import nxScrollView from '@/components/nxScrollView/index.vue';
 
 import { getList, getList2 } from '@/api/car/index';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../../hooks/useRequest/useRequst';
-import nxImage from '@/components/nxImage/nxImage.vue';
-import nxScrollView from '@/components/nxScrollView/index.vue';
 
 const router = useRouter();
 </script>
@@ -26,7 +26,7 @@ const router = useRouter();
                 height="96rpx"
               />
             </div>
-            <div class="p-y-32rpx p-x-64rpx bg-white" @click="router.navigateTo({ name:'electronicDetail'})">
+            <div class="p-y-32rpx p-x-64rpx bg-white">
               <div class="text-center text-lightGrayText text-titleSmall">
                 2022-07-06 12:47:38
               </div>

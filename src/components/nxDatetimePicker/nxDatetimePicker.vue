@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 import dayjs from 'dayjs';
 interface Props {
-  modelValue: string | number, //如果默认选择当前时间必须传入默认值
+  modelValue: string | number | undefined, //如果默认选择当前时间必须传入默认值
   type: 'date' | 'time' | 'year-month' | 'datetime' | 'timeRange' | 'secondsTime', //类型，可选值为 date time year-month不建议动态修改
   // eslint-disable-next-line vue/require-default-prop
   minDate?: number, //可选的最小时间，精确到分钟
@@ -69,51 +69,37 @@ const input = (e: any, isTimePicker: boolean) => {
   const res = isTimePicker ? e.detail.value.join(':') : e.detail;
   emit('update:modelValue', res);
   show.value = false;
-  content.value = isTimePicker ? res : dayjs(res).format(props.type==='datetime'?'YYYY-MM-DD HH:mm':'YYYY-MM-DD');
-  contentSource.value = content.value;
 };
-const isPlaceHolder = ref(false);
 const show = ref(false);
-const content = ref('');
-const contentSource = ref('');
-watch(contentSource, (nVal) => {
-  if (nVal.indexOf('-') !== -1 || nVal.indexOf(':') !== -1) {
+const cellContent = computed(() => {
+  let options:any = [];
+  let activeItem:any = null;
+  if(['timeRange'].includes(props.type)){
+    options = columnsRange.value;
+    activeItem = options.find((item:any) => item === props.modelValue);
+  }else if(['secondsTime'].includes(props.type)){
+    activeItem = {
+      name:props.modelValue
+    };
     if (props.nextDay) {
-      content.value = '次日' + content.value;
+      activeItem.name = '次日' + activeItem.name;
     } else {
-      content.value = contentSource.value;
+      activeItem.name = activeItem.name;
     }
-    isPlaceHolder.value = true;
-  } else {
-    isPlaceHolder.value = false;
+  }else{
+    activeItem = {
+      name:dayjs(props.modelValue).format(props.type==='datetime'?'YYYY-MM-DD HH:mm':'YYYY-MM-DD')
+    };
   }
-}, { immediate: true });
-
-watch(() => props.nextDay, (nVal) => {
-  if (nVal) {
-    content.value = '次日' + content.value;
-  } else {
-    content.value = contentSource.value;
-  }
+  return activeItem.name ? activeItem.name : props.placeholder;
 });
-onMounted(() => {
-  if (props.placeholder) {
-    content.value = props.placeholder;
-  }
-
-});
-function clearContent(){
-  content.value = props.placeholder ?? '';
-  isPlaceHolder.value = false;
-}
-defineExpose({clearContent});
 </script>
 <template>
   <van-cell
-    :class="isPlaceHolder ? 'cell-content' : ''"
+    :class="props.modelValue ? 'cell-content' : ''"
     :title="props.label"
     is-link
-    :value="content"
+    :value="cellContent"
     :input-align="props?.inputAlign"
     :required="props.required"
     :border="props.border"

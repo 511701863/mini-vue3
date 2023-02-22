@@ -53,6 +53,9 @@ export function useRequest<T, P extends any[] = any[]>(
         }
       })
       .finally(() => {
+        if (typeof options.onFinally === 'function') {
+          options.onFinally?.(args);
+        }
         querise[key].loading = false;
       });
   };

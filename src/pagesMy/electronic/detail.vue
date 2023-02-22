@@ -1,43 +1,53 @@
 <script setup lang="ts">
 import { ref, reactive, Ref, computed, watch } from 'vue';
-import { onLoad } from '@dcloudio/uni-app';
+import { onLoad, onShow } from '@dcloudio/uni-app';
 
 import ElectronicDiaLog from './components/ElectronicDiaLog.vue';
-import nxImage from '@/components/nxImage/nxImage.vue';
 
 import type { TextData, Path, markersData } from './type';
 
 import AMap from '../../common/amap-wx.130.js';
+import { getElectricDetail} from '@/api/my/electronic';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
 
+const { run:getElectricDetailFn, data } = useRequest<MyCenter.ElectricFenceVo>(getElectricDetail, {
+  manual: true,
+  onSuccess:() => {
+    latitude.value = data.value?.roundFence?.center?.latitude ?? data.value?.polygonFence?.center?.latitude ?? uni.getStorageSync('latitude');
+    longitude.value = data.value?.roundFence?.center?.longitude ?? data.value?.polygonFence?.center?.longitude ?? uni.getStorageSync('longitude');
+    state.markersData = data.value? [data.value] : [];
+    state.markers = state.markersData.map((item) => {
+      return {
+        latitude: (item.roundFence?.center?.latitude ?? item.polygonFence?.center?.latitude ?? 0) ?? 0,
+        longitude: (item.roundFence?.center?.longitude ?? item.polygonFence?.center?.longitude ?? 0),
+        length: item.roundFence?.radius ?? item.polygonFence?.radius,
+        type: item.roundFence ? 1 : 2
+      };
+    });
+    createMarker(state.markers);
+  }
+});
+const eId:any = ref('');
+onLoad((query) => {
+  const { id } = query;
+  eId.value = id;
+  getElectricDetailFn({id});
+});
+onShow(() => {
+  getElectricDetailFn({id:eId.value});
+});
 let myAmapFun = new AMap.AMapWX({ key: 'cf893f474862b6533054310120072d17' });
 const latitude: Ref<number> = ref(0);
 const longitude: Ref<number> = ref(1);
-const markLength: Ref<number> = ref(0.5);
+const markLength: Ref<number> = ref(500);
 const DialogShow = ref(true);
 const state = reactive({
   markers: [] as Path[],
-  markersData: [] as markersData,
+  markersData: [] as MyCenter.ElectricFenceVo[],
   polygons: [] as any,
   circle: [] as any,
   chosen: {} as Path
-});
-//获取当前位置 poi搜索附近兴趣点 模拟数据
-myAmapFun.getPoiAround({
-  success: function (data: any) {
-
-    state.markersData = data.markers.splice(0, 1);
-    state.markers = state.markersData;
-    latitude.value = state.markersData[0].latitude;
-    longitude.value = state.markersData[0].longitude;
-    createMarker(state.markersData);
-    //成功回调
-  },
-  fail: function (info: any) {
-    //失败回调
-    console.log(info, 123);
-  }
 });
 const router = useRouter();
 
@@ -48,11 +58,11 @@ function tipBtn() {
   state.circle = [];
   state.markers.forEach((element: any) => {
     //绘制圆
-    if (markType.value) {
+    if (element.type === 1) {
       state.circle.push({
         longitude: element.longitude,
         latitude: element.latitude,
-        radius: markLength.value * 1000,
+        radius: (element.length || markLength.value),
         fillColor: '#FF34543a',
         color: '#FF3454',
         strokeWidth: '1'
@@ -60,21 +70,23 @@ function tipBtn() {
     } else {
       //绘制矩形
       let points = [];
+      console.log(element.length);
+
       points.push({
-        ['longitude']: Number(+element.longitude + markLength.value / 100),
-        ['latitude']: Number(+element.latitude - markLength.value / 111)
+        ['longitude']: Number(element.longitude + (element.length || markLength.value) / 100 / 1000),
+        ['latitude']: Number(element.latitude - (element.length || markLength.value) / 111 / 1000)
       });
       points.push({
-        ['longitude']: Number(+element.longitude + markLength.value / 100),
-        ['latitude']: Number(+element.latitude + markLength.value / 111)
+        ['longitude']: Number(element.longitude + (element.length || markLength.value) / 100 / 1000),
+        ['latitude']: Number(element.latitude + (element.length || markLength.value) / 111 / 1000)
       });
       points.push({
-        ['longitude']: Number(+element.longitude - markLength.value / 100),
-        ['latitude']: Number(+element.latitude + markLength.value / 111)
+        ['longitude']: Number(element.longitude - (element.length || markLength.value) / 100 / 1000),
+        ['latitude']: Number(element.latitude + (element.length || markLength.value) / 111 / 1000)
       });
       points.push({
-        ['longitude']: Number(+element.longitude - markLength.value / 100),
-        ['latitude']: Number(+element.latitude - markLength.value / 111)
+        ['longitude']: Number(element.longitude - (element.length || markLength.value) / 100 / 1000),
+        ['latitude']: Number(element.latitude - (element.length || markLength.value) / 111 / 1000)
       });
       state.polygons.push({
         points: points,
@@ -90,11 +102,6 @@ function tipBtn() {
 }
 function makertap(e: any) {
   console.log(e);
-  // let id = e.markerId;
-  // console.log(e);
-  // DialogShow.value = true;
-  // createMarker(state.markersData);
-  // tipBtn(2);
 }
 function createMarker(data: any) {
   let markers = [];
@@ -102,7 +109,7 @@ function createMarker(data: any) {
     data[j].iconPath = 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/map_icon.png'; //如：..­/..­/img/marker_checked.png
     data[j].width = '80rpx';
     data[j].height = '96rpx';
-    data[j].type = j + 1;
+    data[j].id = j;
     markers.push(data[j]);
   }
   state.markers = markers;
@@ -124,7 +131,7 @@ function createMarker(data: any) {
       :markers="state.markers"
       @markertap="makertap"
     ></map>
-    <ElectronicDiaLog v-model="DialogShow" :overlay="false" />
+    <ElectronicDiaLog v-model="DialogShow" :overlay="false" :info="data" />
   </div>
 </template>
 <style scoped lang="scss">

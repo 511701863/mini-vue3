@@ -2,7 +2,7 @@ import { RoutesNamesType } from '../../router/types';
 export type CarInfo={
   mile:string,
   value:string,
-  label:string,
+  name:string,
   electricity:string,
 }
 

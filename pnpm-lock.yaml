@@ -28,6 +28,7 @@ specifiers:
   eslint: ^8.23.1
   eslint-plugin-vue: ^9.5.1
   husky: ^8.0.1
+  js-base64: ^3.7.5
   lint-staged: ^13.0.3
   miniprogram-api-typings: ^3.8.1
   only-allow: ^1.1.1
@@ -42,6 +43,7 @@ specifiers:
   vue: ^3.2.37
   vue-i18n: ^9.1.9
   vuex: ^4.0.2
+  wxmp-rsa: ^2.1.0
 
 dependencies:
   '@dcloudio/uni-app': 3.0.0-alpha-3040820220424001_vue@3.2.40
@@ -59,11 +61,13 @@ dependencies:
   '@types/wechat-miniprogram': registry.npmmirror.com/@types/wechat-miniprogram/3.4.1
   cos-wx-sdk-v5: 1.4.7
   dayjs: 1.11.6
+  js-base64: registry.npmmirror.com/js-base64/3.7.5
   pinia: 2.0.23_bfjwoga25wxjazzogo7o372nwq
   sucrase: registry.npmmirror.com/sucrase/3.29.0
   vue: 3.2.40
   vue-i18n: 9.2.2_vue@3.2.40
   vuex: 4.0.2_vue@3.2.40
+  wxmp-rsa: registry.npmmirror.com/wxmp-rsa/2.1.0
 
 devDependencies:
   '@commitlint/config-conventional': 17.1.0
@@ -5270,6 +5274,12 @@ packages:
     version: 7.0.0
     engines: {node: '>=0.12.0'}
 
+  registry.npmmirror.com/js-base64/3.7.5:
+    resolution: {integrity: sha512-3MEt5DTINKqfScXKfJFrRbxkrnk2AxPWGBL/ycjz4dK8iqiSJ06UxD8jh8xuh6p10TX4t2+7FsBYVxxQbMg+qA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/js-base64/-/js-base64-3.7.5.tgz}
+    name: js-base64
+    version: 3.7.5
+    dev: false
+
   registry.npmmirror.com/klona/2.0.5:
     resolution: {integrity: sha512-pJiBpiXMbt7dkzXe8Ghj/u4FfXOOa98fPW+bihOJ4SjnoijweJrNThJfd3ifXpXhREjpoF2mZVH1GfS9LV3kHQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/klona/-/klona-2.0.5.tgz}
     name: klona
@@ -5527,3 +5537,9 @@ packages:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/wrappy/-/wrappy-1.0.2.tgz}
     name: wrappy
     version: 1.0.2
+
+  registry.npmmirror.com/wxmp-rsa/2.1.0:
+    resolution: {integrity: sha512-VbWMJ+vf8t7G93sjkqjCn5yGy/Si3M8uD6OFebqjJWJ1R0WCyle7X6SNia7WWG6Qe1F2/OWxhbcSGA6ebUBwIA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/wxmp-rsa/-/wxmp-rsa-2.1.0.tgz}
+    name: wxmp-rsa
+    version: 2.1.0
+    dev: false

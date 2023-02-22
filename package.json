@@ -30,11 +30,13 @@
     "@types/wechat-miniprogram": "^3.4.1",
     "cos-wx-sdk-v5": "^1.4.7",
     "dayjs": "^1.11.6",
+    "js-base64": "^3.7.5",
     "pinia": "^2.0.23",
     "sucrase": "^3.29.0",
     "vue": "^3.2.37",
     "vue-i18n": "^9.1.9",
-    "vuex": "^4.0.2"
+    "vuex": "^4.0.2",
+    "wxmp-rsa": "^2.1.0"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^17.1.0",

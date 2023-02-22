@@ -4,21 +4,54 @@ import { onLoad, onShow } from '@dcloudio/uni-app';
 
 import PinInput from './components/myp-one.vue';
 
-import { getList, getList2 } from '@/api/car/index';
+import { submitPhoneAndCode, resendSubmitPhone, submitPhone } from '@/api/my/pinConfig';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
-const router = useRouter();
-const time =ref(60 * 1000);
-const reloadFlag = ref(false);
-const pin:Ref<string>= ref('');
+import { useUser } from '../../store/modules/user';
 
-watch(pin, (newPin) => {
-  if(newPin){
-    router.navigateTo({name:'pinConfigSetPin', query:{original:true}});
+const { userState } = useUser();
+const router = useRouter();
+const time = ref(60 * 1000);
+const reloadFlag = ref(false);
+const pin: Ref<string> = ref('');
+const code: Ref<string> = ref('');
+const { run: submitPhoneFn } = useRequest<boolean>(submitPhone, {
+  manual: false,
+  defaultParmas: [{ mobile: userState.userInfo.mobile }],
+  onSuccess: (res) => {
+    uni.showToast({
+      title: '已发送短信到您的手机',
+      icon: 'none'
+    });
   }
 });
-function reSend(){
+const { run: resendSubmitPhoneFn } = useRequest<boolean>(resendSubmitPhone, {
+  manual: true,
+  onSuccess: (res) => {
+    uni.showToast({
+      title: '已发送短信到您的手机',
+      icon: 'none'
+    });
+  }
+});
+const { run: submitPhoneAndCodeFn } = useRequest<boolean>(submitPhoneAndCode, {
+  manual: true,
+  onSuccess: (res) => {
+    router.navigateTo({ name: 'pinConfigSetPin', query: { original: true, phone: userState.userInfo.mobile, code:code.value } });
+  }
+});
+watch(pin, (newPin) => {
+  if (newPin) {
+    submitPhoneAndCodeFn({
+      mobile: userState.userInfo.mobile,
+      code: newPin
+    });
+    code.value = newPin;
+  }
+});
+function reSend() {
   reloadFlag.value = false;
+  resendSubmitPhoneFn({ mobile: userState.userInfo.mobile });
 }
 </script>
 
@@ -28,7 +61,7 @@ function reSend(){
       请输入验证码
     </div>
     <div class="text-titleSmall mt-12rpx mb-72rpx text-gray">
-      验证码已发送至 <span class="text-warn">18483923840</span>
+      验证码已发送至 <span class="text-warn">{{ userState.userInfo.mobile }}</span>
     </div>
     <PinInput v-model="pin" type="box" :maxlength="6" />
     <div class="text-center text-warn text-titleMedium">
@@ -42,7 +75,8 @@ function reSend(){
   width: 750rpx;
   height: 100vh;
 }
-.label-class{
-  color: #000000!important;
+
+.label-class {
+  color: #000000 !important;
 }
 </style>

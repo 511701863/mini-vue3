@@ -1,3 +1,4 @@
+import { ResponseData } from '@/http/types';
 import { ComputedRef, WatchSource, Ref } from 'vue';
 
 export interface Response<T> {
@@ -5,8 +6,9 @@ export interface Response<T> {
   data: T;
   msg: string;
 }
-
-export type AppAxiosResponse<T = any> = Response<T> & {data:any};
+export type ReturnType<T extends (...args: any) => any> = T extends (...args: any) => infer R ? R : any;
+export type GetPromiseValue<T> = T extends Promise<infer P> ? GetPromiseValue<P> : T;
+export type AppAxiosResponse<T = any> = ResponseData<T> & {data:any};
 
 export interface HttpError<T = any> {
   status: number | string;
@@ -14,7 +16,7 @@ export interface HttpError<T = any> {
   mag: string;
 }
 
-export type Service<T, P extends any[]> = (...args: P) => Promise<AppAxiosResponse<T>>;
+export type Service<T, P extends any[]> = (...args: P) => Promise<ResponseData<T>>;
 
 export interface Options<T, P extends any[]> {
   // 是否手动发起请求
@@ -39,6 +41,8 @@ export interface Options<T, P extends any[]> {
   // 失败回调
   onError?: (err: HttpError, params: P) => void;
 
+  //最终回调
+  onFinally?:(params: P) => void;
   //是否启用loading
   // loading?:boolean;
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from '@/router/router';
 import { onMounted, ref, reactive, watchEffect, watch, isRef, computed } from 'vue';
+import nxImage from '@/components/nxImage/nxImage.vue';
 import { CarInfo, controlItem } from '../type';
 import { useRequest } from '@/hooks/useRequest/useRequst';
 import { getList, getList2 } from '@/api/car/index';
@@ -20,7 +21,11 @@ const state = reactive({
 
 <template>
   <view>
-    <image src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_bg.png" />
+    <nx-image
+      src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_bg.png"
+      width="770rpx"
+      height="794rpx"
+    />
     <div class="car-img">
       <image src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_car.png" />
     </div>
@@ -64,11 +69,6 @@ const state = reactive({
   </view>
 </template>
 <style lang="scss" scoped>
-image {
-  width: 770rpx;
-  height: 794rpx;
-}
-
 .car-info {
   position: absolute;
   top: 198rpx;

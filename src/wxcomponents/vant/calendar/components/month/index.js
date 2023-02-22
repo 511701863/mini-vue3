@@ -1,5 +1,5 @@
 import { VantComponent } from '../../../common/component';
-import { getMonthEndDay, compareDay, getPrevDay, getNextDay, } from '../../utils';
+import { getMonthEndDay, compareDay, getPrevDay, getNextDay } from '../../utils';
 VantComponent({
     props: {
         date: {

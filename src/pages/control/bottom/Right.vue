@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { useRouter } from '@/router/router';
 import { onMounted, ref, reactive, watchEffect, watch, isRef, computed } from 'vue';
+
+import nxImage from '@/components/nxImage/nxImage.vue';
+
 import { CarInfo, controlItem } from '../type';
+
+import { useRouter } from '@/router/router';
 import { useRequest } from '@/hooks/useRequest/useRequst';
 import { getList, getList2 } from '@/api/car/index';
 import { debounce } from '@/utils/tool/index';
@@ -63,8 +67,16 @@ const btnList = ref<Partial<controlItem>[]>([
 function clickControl(item: Partial<controlItem>) {
  router.navigateTo({name:item.routerName});
 }
-function goToAir() {
-  router.navigateTo({ name: 'airControl' });
+function call() {
+  uni.makePhoneCall({
+    phoneNumber: '400-8877-668',
+    success: function () {
+      console.log('拨打电话成功');
+    },
+    fail() {
+      console.log('打电话失败了');
+    }
+  });
 }
 </script>
 
@@ -72,16 +84,25 @@ function goToAir() {
   <div>
     <div class="control-card  flex flex-wrap">
       <div v-for="(item, index) in btnList" :key="index" class="icon-box" @click="clickControl(item)">
-        <img class="w-96rpx h-96rpx" :src="item.src">
+        <nx-image
+          :src="item.src"
+          width="96rpx"
+          height="96rpx"
+        />
         <div class="text-medium mt-mini">
           {{ item.name }}
         </div>
       </div>
     </div>
-    <div class="control-card  flex justify-between flex-wrap">
+    <div class="control-card  flex justify-between flex-wrap" @click="call">
       <div class="text-titleMedium">
         一键救援
-      </div> <img class="w-48rpx h-48rpx" src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/callPhone.png">
+      </div>
+      <nx-image
+        src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/callPhone.png"
+        width="48rpx"
+        height="48rpx"
+      />
     </div>
   </div>
 </template>

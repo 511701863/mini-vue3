@@ -2,29 +2,33 @@
 import { useRouter } from '@/router/router';
 import { onMounted, ref, reactive, watchEffect, watch, isRef, computed } from 'vue';
 
+import nxImage from '@/components/nxImage/nxImage.vue';
+
 import { CarInfo, controlItem } from '../type';
 
 import { useRequest } from '@/hooks/useRequest/useRequst';
 import { getList, getList2, pushMsg } from '@/api/car/index';
 import { debounce } from '@/utils/tool/index';
+import { useConfig } from '../../../store/modules/config';
+const { setPin, config } = useConfig();
 
 type BottomLeftProps = {
   dialog: boolean,
-  id:number|string
+  id: number | string
 }
 
 const router = useRouter();
 
 const props = withDefaults(defineProps<BottomLeftProps>(), {
   dialog: false,
-  id:2
+  id: 2
 });
 const emit = defineEmits<{(e: 'update:dialog', value: boolean): void,
-  (e: 'update:id', value: number|string): void
+  (e: 'update:id', value: number | string): void
 }>();
-const state = reactive<{clickItem:any, data:any}>({
+const state = reactive<{ clickItem: any, data: any }>({
   data: {},
-  clickItem:{}
+  clickItem: {}
 });
 
 const airList = ref<controlItem[]>([{
@@ -82,8 +86,8 @@ const btnList = ref<controlItem[]>([{
   name: '天窗'
 }
 ]);
-function onSuccess(res:any) {
-  if(state.clickItem.check !== undefined){
+function onSuccess(res: any) {
+  if (state.clickItem.check !== undefined) {
     state.clickItem.check = !state.clickItem.check;
   }
 }
@@ -92,13 +96,15 @@ const { run, data } = useRequest<any, any>(pushMsg, {
   onSuccess
 });
 function clickControl(item: controlItem) {
-  if ([2, 5, 6].includes(Number(item.id) as number)) {
-    emit('update:dialog', !props.dialog);
-    emit('update:id', item.id || 2);
-  } else {
-    state.clickItem= item;
-    run();
-  }
+  return function () {
+    if ([2, 5, 6].includes(Number(item.id) as number)) {
+      emit('update:dialog', !props.dialog);
+      emit('update:id', item.id || 2);
+    } else {
+      state.clickItem = item;
+      run();
+    }
+  };
 }
 function goToAir() {
   router.navigateTo({ name: 'airControl' });
@@ -108,8 +114,12 @@ function goToAir() {
 <template>
   <div>
     <div class="control-card flex justify-between flex-wrap">
-      <div v-for="(item, index) in btnList" :key="index" class="icon-box" @click="clickControl(item)">
-        <img :src="item.check ? item.checkSrc : item.src">
+      <div v-for="(item, index) in btnList" :key="index" class="icon-box" @click="setPin(true, 0, clickControl(item))">
+        <nx-image
+          :src="item.check ? item.checkSrc : item.src"
+          width="96rpx"
+          height="96rpx"
+        />
         <div class="text-medium mt-mini">
           {{ item.name }}
         </div>
@@ -132,7 +142,11 @@ function goToAir() {
           </div>
         </div>
         <div v-for="(item, index) in airList" :key="index" class="icon-box" @click="clickControl(item)">
-          <img :src="item.check ? item.checkSrc : item.src">
+          <nx-image
+            :src="item.check ? item.checkSrc : item.src"
+            width="96rpx"
+            height="96rpx"
+          />
           <div class="text-medium mt-mini">
             {{ item.name }}
           </div>
@@ -155,11 +169,6 @@ function goToAir() {
     box-sizing: border-box;
     margin-bottom: 32rpx;
     text-align: center;
-  }
-
-  image {
-    width: 96rpx;
-    height: 96rpx;
   }
 }
 </style>

@@ -4,25 +4,75 @@ import { onLoad, onShow } from '@dcloudio/uni-app';
 
 import PinInput from './components/myp-one.vue';
 
-import { getList, getList2 } from '@/api/car/index';
+import { checkHasSetPin, verifyPin, getPublicKey, resetByOldPin, resetPinByPhone, setPin } from '@/api/my/pinConfig';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
+import {setPublicKey, getRsaPin} from '@/utils/rsa/index';
+const {run:checkPinFn, data:hasPin} = useRequest<boolean>(checkHasSetPin, {
+  manual:true,
+  onSuccess:(res) => {
+    if(res.data){
+      flag.value = 0;
+      title.value = '请输入原PIN码';
+    }
+  }
+});
+const {run:getPublicKeyFn, data:publicKeyData} = useRequest<{publicKey:string}>(getPublicKey, {
+  manual:true,
+  onSuccess:(res) => {
+    setPublicKey(publicKeyData.value?.publicKey);
+    const rsaPin = getRsaPin(oldPin.value);
+    verifyPinFn({pin:rsaPin});
+  }
+});
+const {run:verifyPinFn} = useRequest<boolean>(verifyPin, {
+  manual:true,
+  onSuccess:(res) => {
+    console.log(res);
+    flag.value++;
+    title.value = '请设置PIN码';
+  }
+});
+const {run:resetByOldPinFn} = useRequest<boolean>(resetByOldPin, {
+  manual:true,
+  onSuccess:setPinSuccess
+});
+const {run:resetPinByPhoneFn} = useRequest<boolean>(resetPinByPhone, {
+  manual:true,
+  onSuccess:setPinSuccess
+});
+const {run:setPinFn} = useRequest<boolean>(setPin, {
+  manual:true,
+  onSuccess:setPinSuccess
+});
 const router = useRouter();
 const pinInputRef:any = ref(null);
 const pin:Ref<string>= ref('');
 const firstPin:Ref<string>= ref('');
+const oldPin:Ref<string>= ref('');
+const mobile:Ref<string>= ref('');
+//验证码
+const phoneCode:Ref<string> = ref('');
 const title:Ref<string>= ref('请设置PIN码');
-const flag = ref(0);
+//步骤 0 需要输入原始pin  1 设置pin  2 确认pin
+const flag = ref(1);
+const setType = ref(1);
 const delta = ref(2);
 function nextTap(){
   if(flag.value === 0){
+    oldPin.value = pin.value;
+    getPublicKeyFn();
+    pinInputRef?.value?.clear();
+    return;
+  }
+  if(flag.value === 1){
     firstPin.value = pin.value;
     flag.value++;
     title.value = '请再次确认PIN码';
     pinInputRef?.value?.clear();
     return;
   }
-  if(flag.value === 1){
+  if(flag.value === 2){
     if(firstPin.value !== pin.value){
       uni.showToast({
         title:'两次输入PIN不一致',
@@ -30,17 +80,45 @@ function nextTap(){
       });
       return;
     }
+    const rsaPin = getRsaPin(oldPin.value);
+    const newPin = getRsaPin(pin.value);
     pinInputRef?.value?.clear();
-    router.navigateBack({delta:delta.value});
+    if(oldPin.value){
+      resetByOldPinFn({
+        pin:newPin,
+        oldPin:rsaPin
+      });
+      return;
+    }
+    if(mobile.value){
+      resetPinByPhoneFn({
+        pin:newPin,
+        code:phoneCode.value,
+        mobile:mobile.value
+      });
+      return;
+    }
+    setPinFn({
+        pin:newPin
+      });
+    // router.navigateBack({delta:delta.value});
   }
 
 }
+function setPinSuccess(res:any){
+  if(res.data){
+    router.navigateBack({delta:delta.value});
+  }
+}
 onLoad((query) => {
-  const { original } = query;
+  const { original, phone, code } = query;
   if (original) {
     delta.value =2;
+    mobile.value = phone ?? '';
+    phoneCode.value = code ?? '';
   }else{
     delta.value =1;
+    checkPinFn();
   }
   console.log(delta.value);
 });

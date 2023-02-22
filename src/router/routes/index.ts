@@ -140,13 +140,6 @@ export const subPackages = [
         }
       },
       {
-        'path': 'pinConfig/original',
-        'name': 'pinConfigOriginal',
-        'style': {
-          'navigationBarTitleText': '设置PIN码'
-        }
-      },
-      {
         'path': 'pinConfig/setPin',
         'name': 'pinConfigSetPin',
         'style': {

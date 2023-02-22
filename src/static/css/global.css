@@ -36,7 +36,9 @@ button {
 ::-webkit-scrollbar{
   width: 0;
   height: 0;
-  color: transparent;
+  display: none;
+  opacity: 0;
+  color: transparent!important;
 }
 button[disabled]{
   background-color: #E3E3E3 !important;

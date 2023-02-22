@@ -5,30 +5,41 @@ import { onLoad } from '@dcloudio/uni-app';
 import nxScrollView from '@/components/nxScrollView/index.vue';
 import nxImage from '@/components/nxImage/nxImage.vue';
 
-import {areaList} from './areaList';
-import { getList, getList2 } from '@/api/car/index';
+import { getProvinceList, getStoreList } from '@/api/my/maintenance';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
 import { useStore } from '../../store/modules/store';
 
 const {setStore} = useStore();
 const router = useRouter();
+const scrollViewRef:any = ref(null);
 const params = reactive({
-  provinceCode:'',
-  province:''
+  provinceCode:uni.getStorageSync('provinceCode'),
+  province:uni.getStorageSync('province'),
+  pageSize:10,
+  name:''
 });
 const citySelectShow =ref(false);
+
+const {data:cityData} = useRequest<MyCenter.AreaVo[]>(getProvinceList, {
+  manual:false
+});
+
 function choseCity(){
   citySelectShow.value=true;
 }
 function confirmCity(value:any){
   citySelectShow.value=false;
-  params.provinceCode = value.detail.values[0].code;
-  params.province = value.detail.values[0].name;
+  params.provinceCode = value.detail.value;
+  params.province = value.detail.name;
+  scrollViewRef.value.search();
 }
 function choseStore(item:any){
   setStore(item);
   router.navigateBack({});
+}
+function changeInput(){
+  scrollViewRef.value.search();
 }
 onLoad(() => {
   params.province = uni.getStorageSync('province');
@@ -50,22 +61,22 @@ onLoad(() => {
           width="28rpx"
           height="28rpx"
         />
-        <input type="text" placeholder="请输入4S店名称" class="text-titleMedium">
+        <input v-model="params.name" type="text" placeholder="请输入4S店名称" class="text-titleMedium" @change="changeInput">
       </div>
     </div>
-    <nxScrollView :cb-fn="getList" :header-height="64" :params="{pageSize:10}">
+    <nxScrollView ref="scrollViewRef" :cb-fn="getStoreList" :header-height="64" :params="params">
       <template #list="{ list }">
         <div class="lh-108rpx bg-pageBg p-x-32rpx">
           全部4S店
         </div>
-        <div v-for="(item,index) in list" :key="index">
+        <div v-for="(item,index) in list as MyCenter.DealersAppPageResultAo[]" :key="index">
           <div class="w-100vw bg-white p-32rpx box-border" @click="choseStore(item)">
             <div class="flex justify-between items-center">
               <div class="font-bold flex-1">
-                宜宾三丰
+                {{ item.name }}
               </div>
               <div class="text-gray text-titleMedium flex">
-                {{ '02800000000' }}
+                {{ item.hotPhone }}
                 <nx-image
                   src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/phone.png"
                   class="ml-8rpx"
@@ -81,16 +92,27 @@ onLoad(() => {
                 width="24rpx"
                 height="24rpx"
               />
-              {{ '成都市成华区建设路2段22号成都市成华区建设路2段22号' }}
+              {{ item.address }}
             </div>
             <div></div>
           </div>
         </div>
       </template>
     </nxScrollView>
-    <van-popup :show="citySelectShow" round position="bottom" close-on-click-overlay @close="citySelectShow=false">
-      <van-area :area-list="areaList" value="110000" :columns-num="1" @cancel="citySelectShow=false" @confirm="confirmCity" />
-    </van-popup>
+    <van-action-sheet
+      title="请选择所在地区"
+      :show="citySelectShow"
+      :actions="cityData?.map(item=>{
+        return {
+          value:item.areaId,
+          name:item.shortName
+        }
+      })"
+      close-on-click-overlay
+      close-on-click-action
+      @select="confirmCity"
+      @close="citySelectShow=false"
+    />
   </div>
 </template>
 <style scoped lang="scss">

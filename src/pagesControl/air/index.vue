@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { useRouter } from '@/router/router';
 import { onMounted, ref, reactive } from 'vue';
-import content from '@/components/content/content.vue';
+
+import nxImage from '@/components/nxImage/nxImage.vue';
+
+import { useRouter } from '@/router/router';
 
 const router = useRouter();
 const swiperIndex = ref<number>(0);
@@ -114,7 +116,11 @@ function goToAir() {
           <div class="control-card">
             <div class="flex justify-between">
               <div v-for="(item, index) in airList" :key="index" class="icon-box" @click="clickControl(item)">
-                <img :src="item.check ? item.checkSrc : item.src">
+                <nx-image
+                  :src="item.check ? item.checkSrc : item.src"
+                  width="96rpx"
+                  height="96rpx"
+                />
                 <div class="text-medium mt-mini">
                   {{ item.name }}
                 </div>

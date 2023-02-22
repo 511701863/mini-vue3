@@ -1,6 +1,7 @@
 import { RequestOptions, ResponseData } from './types';
 import errorHandle from './errorHandle';
 import { useConfig } from '@/store/modules/config';
+import { json } from 'stream/consumers';
 
 const {getBaseUrl, config} = useConfig();
 type MethodType = UniNamespace.RequestOptions['method']
@@ -9,7 +10,7 @@ getBaseUrl();
 let requestNum = 0; // 请求次数
 let showLoading = false; // loading 状态
 function createRequest(method: MethodType) {
-  return async function <T>(options: RequestOptions):Promise<any>{
+  return async function <T>(options: RequestOptions):Promise<ResponseData<T>>{
     return new Promise(async (resolve, reject) => {
       //请求拦截器
       // 添加loading
@@ -25,8 +26,7 @@ function createRequest(method: MethodType) {
         }
       }
       const header = {
-        cookie: uni.getStorageSync('COOKIE'),
-        userId: 12345
+        'Cookie': uni.getStorageSync('COOKIE')
       };
       uni.request({
         url: config.baseURL + options.url,
@@ -39,7 +39,7 @@ function createRequest(method: MethodType) {
 
           //成功响应拦截
           if (res.header['Set-Cookie'] || res.header['set-cookie']) {
-            uni.setStorageSync('COOKIE', res.header['Set-Cookie'] || res.header['set-cookie']);
+            // uni.setStorageSync('COOKIE', res.header['Set-Cookie'] || res.header['set-cookie']);
           }
           if ([0, 200].includes(data.code)) {
             resolve(data);

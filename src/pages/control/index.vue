@@ -9,6 +9,9 @@ import BottomLeft from './bottom/left.vue';
 import BottomRight from './bottom/right.vue';
 import ControlDiaLog from './components/ControlDiaLog.vue';
 import PinInput from '@/components/pinInput/myp-one.vue';
+import nxScrollView from '@/components/nxScrollView/index.vue';
+import nxImage from '@/components/nxImage/nxImage.vue';
+
 import { CarInfo, controlItem } from './type';
 
 import { useRouter } from '@/router/router';
@@ -29,7 +32,7 @@ onShow(() => {
 const state = reactive({
   carInfo: {
     value: '1234',
-    label: '川A123456',
+    name: '川A123456',
     mile: '456',
     electricity: '70'
   } as CarInfo
@@ -37,26 +40,23 @@ const state = reactive({
 const carList = ref<CarInfo[]>([
   {
     value: '1234',
-    label: '川A123456',
+    name: '川A123456',
     mile: '456',
     electricity: '75'
   },
   {
     value: '1334',
-    label: '川A12256',
+    name: '川A12256',
     mile: '480',
     electricity: '80'
   },
   {
     value: '1434',
-    label: '川A128856',
+    name: '川A128856',
     mile: '490',
     electricity: '90'
   }
 ]);
-const selectList: CarInfo[] = carList.value.map((item) => {
-  return { ...item, name: item.label };
-});
 
 const isShow = ref(false);
 const btnId = ref(2);
@@ -121,61 +121,73 @@ function changeBottomSwiper(e: any) {
 </script>
 
 <template>
-  <NoCar v-if="!isLogin" />
-  <view v-else class="content">
-    <div class="top-box">
-      <div class="car-title" @click="selectCar">
-        <div class="mr-22rpx">
-          {{ state.carInfo.label }}
-        </div>
-        <van-icon name="play" size="32rpx" class="rotate-90" />
-      </div>
-      <div class="dot-box">
-        <div :class="swiperIndex === 0 ? 'active-dot' : ''"></div>
-        <div :class="swiperIndex === 1 ? 'active-dot' : ''"></div>
-      </div>
-      <div class="blue-box">
-        <image src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/4G_s.png" />
-      </div>
-      <div class="control-tab" @click="clickTab">
-        <div :class="controlIndex === 0 ? 'active-tab' : ''" data-index="0" class="mr-64rpx">
-          远程控制
-        </div>
-        <div :class="controlIndex === 1 ? 'active-tab' : ''" data-index="1">
-          车主服务
-        </div>
-      </div>
-      <swiper :current="swiperCurrent" class="w-770rpx h-794rpx" :duration="250" @change="changeSwiper">
-        <swiper-item class="swiper-item">
-          <TopLeft :car-info="state.carInfo" />
-        </swiper-item>
-        <swiper-item class="swiper-item">
-          <TopRight />
-        </swiper-item>
-      </swiper>
+  <div style="overflow:hidden">
+    <NoCar v-show="!isLogin" />
+    <div v-show="isLogin">
+      <nxScrollView :cb-fn="getList" :is-lower-bottom="false" :params="{pageSize:10}">
+        <template #list="{ list }">
+          <view class="content">
+            <div class="top-box">
+              <div class="car-title" @click="selectCar">
+                <div class="mr-22rpx">
+                  {{ state.carInfo.name }}
+                </div>
+                <van-icon name="play" size="32rpx" class="rotate-90" />
+              </div>
+              <div class="dot-box">
+                <div :class="swiperIndex === 0 ? 'active-dot' : ''"></div>
+                <div :class="swiperIndex === 1 ? 'active-dot' : ''"></div>
+              </div>
+              <div class="blue-box">
+                <nx-image
+                  src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/4G_s.png"
+                  width="48rpx"
+                  height="48rpx"
+                />
+              </div>
+              <div class="control-tab" @click="clickTab">
+                <div :class="controlIndex === 0 ? 'active-tab' : ''" data-index="0" class="mr-64rpx">
+                  远程控制
+                </div>
+                <div :class="controlIndex === 1 ? 'active-tab' : ''" data-index="1">
+                  车主服务
+                </div>
+              </div>
+              <swiper :current="swiperCurrent" class="w-770rpx h-794rpx" :duration="250" @change="changeSwiper">
+                <swiper-item class="swiper-item">
+                  <TopLeft :car-info="state.carInfo" />
+                </swiper-item>
+                <swiper-item class="swiper-item">
+                  <TopRight />
+                </swiper-item>
+              </swiper>
+            </div>
+            <div class="bottom-box container pt-92rpx">
+              <swiper :current="controlIndex" :duration="250" class="h-1000rpx" @change="changeBottomSwiper">
+                <swiper-item class="control-swiper-item">
+                  <BottomLeft v-model:dialog="isShow" v-model:id="btnId" />
+                </swiper-item>
+                <swiper-item class="control-swiper-item">
+                  <BottomRight />
+                </swiper-item>
+              </swiper>
+            </div>
+          </view>
+        </template>
+      </nxScrollView>
     </div>
-    <div class="bottom-box container pt-92rpx">
-      <swiper :current="controlIndex" :duration="250" class="h-1000rpx" @change="changeBottomSwiper">
-        <swiper-item class="control-swiper-item">
-          <BottomLeft v-model:dialog="isShow" v-model:id="btnId" />
-        </swiper-item>
-        <swiper-item class="control-swiper-item">
-          <BottomRight />
-        </swiper-item>
-      </swiper>
-    </div>
+    <PinInput type="box" />
     <van-action-sheet
       title="选择车辆"
       :show="carSelectShow"
-      :actions="selectList"
+      :actions="carList"
       close-on-click-overlay
       close-on-click-action
       @select="confirm"
       @close="closeSelect"
     />
-  </view>
-  <PinInput type="box" />
-  <ControlDiaLog v-model="isShow" :btn-id="btnId" />
+    <ControlDiaLog v-model="isShow" :btn-id="btnId" />
+  </div>
 </template>
 <style lang="scss" scoped>
 .top-box {
@@ -190,7 +202,6 @@ function changeBottomSwiper(e: any) {
     z-index: 200;
     text-align: center;
     font-size: 32rpx;
-
     .active-tab {
       font-weight: bold;
     }
@@ -202,11 +213,6 @@ function changeBottomSwiper(e: any) {
     bottom: 36rpx !important;
     z-index: 1;
     text-align: center;
-
-    image {
-      width: 48rpx;
-      height: 48rpx;
-    }
   }
 
   .dot-box {

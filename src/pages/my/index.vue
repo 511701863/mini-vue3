@@ -28,21 +28,6 @@ onShow(() => {
 onLoad(() => {
   console.log(11);
 });
-function navigateToByName(name: string) {
-  router.navigateTo({ name });
-}
-
-const call = () => {
-  uni.makePhoneCall({
-    phoneNumber: '400-8877-668',
-    success: function () {
-      console.log('拨打电话成功');
-    },
-    fail() {
-      console.log('打电话失败了');
-    }
-  });
-};
 
 </script>
 
