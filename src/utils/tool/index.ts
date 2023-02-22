@@ -123,3 +123,25 @@ export function uniqueFunc(arr:any[], uniId:any){
   }, []);
 }
 
+//获取距离
+export function getDistance(lat1:any, lng1:any, lat2:any, lng2:any) {
+  // lat1用户的纬度
+  // lng1用户的经度
+  // lat2目标的纬度
+  // lng2目标的经度
+  const radLat1 = Rad(lat1);
+  const radLat2 = Rad(lat2);
+  const a = radLat1 - radLat2;
+  const b = Rad(lng1) - Rad(lng2);
+  let s:any = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2), 2)));
+  s = s * 6378.137;
+  s = Math.round(s * 10000) / 10000;
+  s = s.toFixed(1) + 'km'; //保留两位小数
+  console.log('经纬度计算的距离:' + s);
+  return s;
+}
+// 计算距离函数
+function Rad(d:any) {
+  //根据经纬度判断距离
+  return d * Math.PI / 180.0;
+}

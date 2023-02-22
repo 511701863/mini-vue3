@@ -7,15 +7,46 @@ import ControlDiaLog from './components/ControlDiaLog.vue';
 
 import type { TextData, Path, markersData } from './type';
 
-import { uniqueFunc } from '@/utils/tool/index';
+import dayjs from 'dayjs';
+import { sendToCar, getCarLocation } from '@/api/control/location';
+import { uniqueFunc, getDistance } from '@/utils/tool/index';
 import AMap from '../../common/amap-wx.130.js';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
 
+const { run: getCarLocationFn, data } = useRequest<Control.VehicleLocationAo>(getCarLocation, {
+  manual: true,
+  onSuccess: () => {
+    const params: any = data.value;
+    myAmapFun.getRegeo({
+      location: `${data.value?.longitude},${data.value?.latitude}`,
+      success: (res: any) => {
+        state.chosen.id = 1;
+        latitude.value = params.latitude;
+        longitude.value = params.longitude;
+        //车辆所在地信息
+        params.name = res[0].regeocodeData.addressComponent.building?.name ?? '';
+        params.address = res[0].regeocodeData.formatted_address ?? '';
+        params.distance = getDistance(uni.getStorageSync('latitude'), uni.getStorageSync('longitude'), params.latitude, params.longitude);
+        state.chosen = params;
+        createMarker([params]);
+      }
+    });
+  }
+});
+const { run: sendToCarFn } = useRequest(sendToCar, {
+  manual: true,
+  onSuccess: () => {
+    uni.showToast({
+      title:'发送成功',
+      icon:'none'
+    });
+  }
+});
 let myAmapFun = new AMap.AMapWX({ key: 'cf893f474862b6533054310120072d17' });
 const latitude: Ref<number> = ref(0);
 const longitude: Ref<number> = ref(1);
-const scale: Ref<number> = ref(13);
+const scale: Ref<number> = ref(5);
 const address: Ref<string> = ref('');
 const addName: Ref<string> = ref('');
 const addFlag = ref(true);
@@ -25,23 +56,10 @@ const state = reactive({
   markersData: [] as markersData,
   chosen: {} as Path
 });
-//获取当前位置 poi搜索附近兴趣点 模拟数据
-myAmapFun.getPoiAround({
-  success: function (data: any) {
-    // state.markers = state.markersData;
-    state.markersData = data.markers.splice(0, 1);
-    createMarker(state.markersData);
-    state.chosen = state.markers[0];
-    //成功回调
-  },
-  fail: function (info: any) {
-    //失败回调
-    console.log(info, 123);
-  }
-});
-onLoad(() => {
-  latitude.value = uni.getStorageSync('latitude');
-  longitude.value = uni.getStorageSync('longitude');
+onLoad((query) => {
+  const { vin } = query;
+  getCarLocationFn({ vin: 'LUYDG2CB1NA775615' });
+
   address.value = uni.getStorageSync('address');
   addName.value = uni.getStorageSync('addName');
 });
@@ -53,14 +71,14 @@ function makertap(e: any) {
 }
 function createMarker(data: any) {
   const markerList = [{
-    id:0,
-    width:'122rpx',
-    height:'134rpx',
-    iconPath:'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/self.png',
-    address:address.value,
-    name:addName.value,
-    latitude:uni.getStorageSync('latitude'),
-    longitude:uni.getStorageSync('longitude')
+    id: 0,
+    width: '122rpx',
+    height: '134rpx',
+    iconPath: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/self.png',
+    address: address.value,
+    name: addName.value,
+    latitude: uni.getStorageSync('latitude'),
+    longitude: uni.getStorageSync('longitude')
   }];
   data[0].iconPath = 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/carTop.png'; //如：..­/..­/img/marker_checked.png
   data[0].width = '48rpx';
@@ -68,28 +86,35 @@ function createMarker(data: any) {
   data[0].id = 1;
   markerList.push(data[0]);
   state.markers = markerList;
+  console.log(state.markers);
 }
-function restMap(){
-  scale.value =13;
-  state.chosen = state.markers[0];
+function restMap() {
+  scale.value = 5;
+  getCarLocationFn({ vin: 'LUYDG2CB1NA775615' });
 }
-function openEnjoy(){
-  console.log(state.chosen);
-
+function send () {
+  sendToCarFn({
+    detailedAddress:state.chosen.address,
+    latitude:state.chosen.latitude,
+    longitude:state.chosen.longitude,
+    position:state.chosen.name,
+    vin:'LUYDG2CB1NA775615'
+  });
+}
+function openEnjoy() {
   wx.openLocation({
-     latitude:+state.chosen.latitude,
-     longitude:+state.chosen.longitude,
-     address:state.chosen.address,
-     name:state.chosen.name,
-     scale: 18
-   });
+    latitude: +state.chosen.latitude,
+    longitude: +state.chosen.longitude,
+    address: state.chosen.address,
+    name: state.chosen.name,
+    scale: 18
+  });
 }
 //搜索相关
 const tips: any = ref([]);
 const onFocusFlag = ref(false);
 const searchInput = ref('');
 const localHistory = ref(uni.getStorageSync('localHistory') || []);
-const checkLocal = ref({ name: '', district: '', address: '' });
 function onFocus() {
   onFocusFlag.value = true;
 }
@@ -101,7 +126,6 @@ function bindInput(e: any) {
     city: uni.getStorageSync('city'),
     success: function (data: any) {
       if (data && data.tips) {
-        console.log(data.tips);
         tips.value = data.tips;
       }
 
@@ -110,7 +134,7 @@ function bindInput(e: any) {
 }
 function bindSearch(e: any) {
   // let keywords = e.target.dataset.keywords;
-  const item = {
+  const item: any = {
     longitude: '',
     latitude: '',
     address: '',
@@ -119,17 +143,29 @@ function bindSearch(e: any) {
   const locations = e.location.split(',');
   item.longitude = locations[0];
   item.latitude = locations[1];
-  item.address = e.district+e.address;
+  item.address = e.district + e.address;
   item.name = e.name;
   item.latitude = locations[1];
   longitude.value = locations[0];
   latitude.value = locations[1];
-  createMarker([item]);
-  state.chosen = state.markers[1];
-  scale.value =16;
+  //绘图
+  item.iconPath = 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/destination.png'; //如：..­/..­/img/marker_checked.png
+  item.width = '80rpx';
+  item.height = '96rpx';
+  item.id = 3;
+  if (state.markers.length < 3) {
+    state.markers.push(item);
+  } else {
+    state.markers.splice(2, 3, item);
+  }
+  item.distance = getDistance(uni.getStorageSync('latitude'), uni.getStorageSync('longitude'), item.latitude, item.longitude);
+
+  state.chosen = item;
+  state.chosen.id = 2;
+  scale.value = 16;
+
   onFocusFlag.value = false;
   searchInput.value = '';
-  checkLocal.value = e;
   //搜索记录存入缓存
   localHistory.value.push(e);
   localHistory.value = uniqueFunc(localHistory.value, 'name');
@@ -169,28 +205,25 @@ watch(searchInput, (n) => {
         />
       </div>
       <scroll-view v-if="onFocusFlag" :scroll-y="true" class="mt-20rpx w-686rpx h-1280rpx bg-white rounded-32rpx">
-        <div
-          v-for="(item) in tips"
-          :key="item.name"
-          class="flex justify-between items-center p-32rpx"
-          @click="bindSearch(item)"
-        >
-          <nx-image
-            src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/local.png"
-            width="32rpx"
-            height="32rpx"
-          />
-          <div class="flex-1 ml-24rpx">
-            <div>{{ item.name }}</div>
-            <div class="text-titleSmall text-gray">
-              {{ item.district + item.address }}
+        <div v-for="(item) in tips" :key="item.name" @click="bindSearch(item)">
+          <div v-show="item.location" class="flex justify-between items-center p-32rpx">
+            <nx-image
+              src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/local.png"
+              width="32rpx"
+              height="32rpx"
+            />
+            <div class="flex-1 ml-24rpx">
+              <div>{{ item.name }}</div>
+              <div class="text-titleSmall text-gray">
+                {{ item.district + item.address }}
+              </div>
             </div>
+            <nx-image
+              src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/icon_arrow_right.png"
+              width="24rpx"
+              height="24rpx"
+            />
           </div>
-          <nx-image
-            src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/icon_arrow_right.png"
-            width="24rpx"
-            height="24rpx"
-          />
         </div>
       </scroll-view>
     </div>
@@ -204,13 +237,15 @@ watch(searchInput, (n) => {
       </div>
     </div>
     <div class="absolute bottom-0">
-      <div v-if="state.chosen.id===1" class="box-border p-32rpx p-y-56rpx w-750rpx bg-white rounded-t-32rpx box-border  p-32rpx p-y-42rpx">
+      <div
+        v-if="state.chosen.id === 2"
+        class="box-border p-32rpx p-y-56rpx w-750rpx bg-white rounded-t-32rpx box-border  p-32rpx p-y-42rpx"
+      >
         <div class="flex justify-between mb-32rpx">
           <div class="text-36rpx font-bold">
             目的位置
           </div>
           <div class="text-titleMedium text-gray">
-            2022年07月07日15:07:24
           </div>
         </div>
         <div class="flex justify-between items-center mb-48rpx">
@@ -222,7 +257,7 @@ watch(searchInput, (n) => {
               {{ state.chosen.address }}
             </div>
             <div class="text-titleMedium">
-              {{ '距你2.8km' }}
+              {{ state.chosen.distance }}
             </div>
           </div>
           <div @click="openEnjoy">
@@ -234,27 +269,27 @@ watch(searchInput, (n) => {
           </div>
         </div>
         <div class="flex flex-between">
-          <button
-            class="button-white w-320rpx"
-            @click="openEnjoy"
-          >
+          <button class="button-white w-320rpx" @click="openEnjoy">
             导航
           </button>
           <button
             class="button-primary w-320rpx"
-            @click="router.navigateTo({ name: 'electronicInfo', query: { add: addFlag } })"
+            @click="send"
           >
             发送到车
           </button>
         </div>
       </div>
-      <div v-else-if="state.chosen.id===0" class="box-border p-32rpx p-y-56rpx w-750rpx bg-white rounded-t-32rpx box-border  p-32rpx p-y-42rpx">
+      <div
+        v-else-if="state.chosen.id === 1"
+        class="box-border p-32rpx p-y-56rpx w-750rpx bg-white rounded-t-32rpx box-border  p-32rpx p-y-42rpx"
+      >
         <div class="flex justify-between mb-32rpx">
           <div class="text-36rpx font-bold">
             车辆位置
           </div>
           <div class="text-titleMedium text-gray">
-            2022年07月07日15:07:24
+            {{ dayjs(state.chosen.updateTime).format('YYYY-MM-DD HH:mm:ss') }}
           </div>
         </div>
         <div class="flex justify-between items-center mb-48rpx">
@@ -266,7 +301,7 @@ watch(searchInput, (n) => {
               {{ state.chosen.address }}
             </div>
             <div class="text-titleMedium">
-              {{ '距你2.8km' }}
+              {{ state.chosen.distance }}
             </div>
           </div>
           <div @click="openEnjoy">
@@ -278,16 +313,10 @@ watch(searchInput, (n) => {
           </div>
         </div>
         <div class="flex flex-between">
-          <button
-            class="button-white w-320rpx"
-            @click="isShow=true"
-          >
+          <button class="button-white w-320rpx" @click="isShow = true">
             寻车
           </button>
-          <button
-            class="button-primary w-320rpx"
-            @click="openEnjoy"
-          >
+          <button class="button-primary w-320rpx" @click="openEnjoy">
             导航到车
           </button>
         </div>

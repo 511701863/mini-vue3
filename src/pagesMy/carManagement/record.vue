@@ -49,7 +49,7 @@ const active = ref(0);
             <div class="mb-32rpx relative w-686rpx bg-white rounded-16rpx p-32rpx box-border" @click="router.navigateTo({name:'maintenanceDetail',query:{item}})">
               <div class="w-622rpx flex justify-between p-y-18rpx text-medium border-b-1rpx border-gray-300">
                 <div class="text-gray-400">
-                  {{ dayjs(Date.now()).format('YYYY-MM-DD hh:mm:ss') }}
+                  {{ dayjs(Date.now()).format('YYYY-MM-DD HH:mm:ss') }}
                 </div>
                 <div class="text-success">
                   操作成功

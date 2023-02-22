@@ -76,3 +76,4 @@ function createRequest(method: MethodType) {
 }
 export const get = createRequest('GET');
 export const post = createRequest('POST');
+export const deleteFn = createRequest('DELETE');

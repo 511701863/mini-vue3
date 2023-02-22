@@ -8,5 +8,7 @@ export type Path={
     name?:string,
     address?:string,
     id?:number
+    distance?:string | number,
+    updateTime?:number
   }
 export type markersData = Path[]

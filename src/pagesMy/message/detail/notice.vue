@@ -1,85 +1,87 @@
 <script setup lang="ts">
-import { ref, reactive, Ref, computed } from 'vue';
+import { ref, reactive, Ref, onMounted } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 
-import { getList, getList2 } from '@/api/car/index';
-import { useRouter } from '@/router/router';
-import { useRequest } from '../../../hooks/useRequest/useRequst';
 import nxImage from '@/components/nxImage/nxImage.vue';
 import nxScrollView from '@/components/nxScrollView/index.vue';
 
+import dayjs from 'dayjs';
+import { listAppMessage, deleteMessage } from '@/api/my/message';
+import { useRouter } from '@/router/router';
+import { useRequest } from '../../../hooks/useRequest/useRequst';
+
 const router = useRouter();
-const list = [
-  {
-  src:'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/msg1.png',
-  title:'服务消息',
-  routeName:'',
-  msg:'',
-  time:''
-  },
-  {
-  src:'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/msg2.png',
-  title:'故障提醒',
-  msg:'',
-  time:''
-  },
-  {
-  src:'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/msg3.png',
-  title:'告警提醒',
-  msg:'',
-  time:''
-  },
-  {
-  src:'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/msg4.png',
-  title:'保养提醒',
-  msg:'',
-  time:''
-  },
-  {
-  src:'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/msg5.png',
-  title:'通知消息',
-  msg:'',
-  time:''
-  },
-  {
-  src:'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/msg6.png',
-  title:'流量提醒',
-  msg:'',
-  time:''
+const scrollRef:any = ref(null);
+const modelCode:any = ref('');
+const { run: deleteMessageFn} = useRequest(deleteMessage, {
+  manual: true,
+  onSuccess: () => {
+    scrollRef.value.search();
   }
-];
-const active = ref(0);
+});
+onLoad((query) => {
+  const { msgModel } = query;
+  modelCode.value = msgModel;
+});
+onMounted(() => {
+  scrollRef.value.search();
+});
+function deleteFn(id:any){
+  uni.showModal({
+    title: '确认删除',
+    content: '电子围栏删除后，将不在该区域对车辆进行监控。请确认是否继续？',
+    confirmColor: '#FF933B',
+    success: function (res) {
+      if (res.confirm) {
+        deleteMessageFn([id]);
+      } else if (res.cancel) {
+        console.log('用户点击取消');
+      }
+    }});
+}
 </script>
 
 <template>
   <div class="relative">
-    <div class="p-32rpx">
-      <div v-for="(item,index) in list" :key="index">
-        <div class=" bg-white p-32rpx flex justify-between">
-          <div>
-            <nx-image
-              :src="item.src"
-              width="96rpx"
-              height="96rpx"
-            />
-          </div>
-          <div class="flex-1 ml-32rpx">
-            <div>
-              <div class="font-bold">
-                {{ item.title }}
-              </div>
-              <div v-if="item.time" class="text-titleSmall text-gray">
-                {{ item.time }}
+    <nxScrollView ref="scrollRef" :cb-fn="listAppMessage" :params="{msgModel:modelCode}" :manual="true">
+      <template #list="{ list }">
+        <div v-for="(item,index) in list as Message.MessageInfoAo[]" :key="index">
+          <van-swipe-cell :right-width="64">
+            <div slot="right" class="text-white flex items-center justify-center w-128rpx h-100% bg-pageBg">
+              <div @click="deleteFn(item.recordId)">
+                <nx-image
+                  src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/delete_icon.png"
+                  width="96rpx"
+                  height="96rpx"
+                />
               </div>
             </div>
-            <p class="text-titleMedium text-gray">
-              {{ item.msg || '暂无消息' }}
-            </p>
-          </div>
+            <div class="p-y-32rpx p-x-64rpx bg-white">
+              <div class="text-center text-lightGrayText text-titleSmall">
+                {{ dayjs(item.actualSendTime).format('YYYY-MM-DD HH:mm:ss') }}
+              </div>
+              <div class="text-titleLarge font-bold mt-24rpx">
+                {{ item.title }}
+              </div>
+              <div class="text-lightGrayText text-26rpx mt-8rpx">
+                {{ item.content }}
+              </div>
+              <div v-if="item.msgBizType === 'ACCREDIT_REMIND'" class="flex flex-between text-26rpx mt-24rpx">
+                <div></div>
+                <div @click="router.navigateTo({name:'carManagement'})">
+                  查看授权车辆<van-icon name="arrow" />
+                </div>
+              </div>
+            </div>
+          </van-swipe-cell>
         </div>
-      </div>
-    </div>
+      </template>
+    </nxScrollView>
   </div>
 </template>
 <style scoped lang="scss">
+.map {
+  width: 750rpx;
+  height: 100vh;
+}
 </style>

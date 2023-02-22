@@ -10,12 +10,14 @@ type Props = {
   //是否开启底部刷新
   isLowerBottom: boolean,
   cbFn: (...args: any[]) => Promise<any>,
+  manual:boolean,
   headerHeight?: number
 }
 const props = withDefaults(defineProps<Props>(), {
   refreshTop: 70,
   headerHeight: 0,
   isLowerBottom: true,
+  manual:false,
   params: {}
 });
 const page = reactive({
@@ -57,8 +59,8 @@ const { run, data } = useRequest(props.cbFn, {
   // refreshDepsParams:computed(() => [Object.assign({ pageSize: page.pageSize, pageIndex: page.pageIndex }, props.params)]),
   onSuccess: (res) => {
     page.total = data.value?.page?.totalCount ?? 0;
-    page.pageSize = data.value?.page?.pageSize ?? 0;
-    page.pageIndex = data.value?.page?.pageIndex ?? 0;
+    page.pageSize = data.value?.page?.pageSize ?? 5;
+    page.pageIndex = data.value?.page?.pageIndex + 1 ?? 1;
     if (page.pageIndex > 1) {
       list.value = [...list.value, ...(data.value?.dataList ?? [])];
     } else {
@@ -83,7 +85,10 @@ const { run, data } = useRequest(props.cbFn, {
   }
 });
 function search(){
-  run(Object.assign({ pageSize: page.pageSize, pageIndex: page.pageIndex }, props.params));
+  const params = {...props.params};
+  delete params.pageIndex;
+
+  run(Object.assign({ pageSize: page.pageSize, pageIndex: page.pageIndex }, params));
 }
 onLoad(() => {
   uni.getSystemInfo({
@@ -95,7 +100,9 @@ onLoad(() => {
       console.log(windowHeight, (props.headerHeight * screenWidth / 750));
     }
   });
-  search();
+  if(!props.manual){
+    search();
+  }
 });
 function onRefresh() {
   if (_freshing.value) { return; }
@@ -127,7 +134,8 @@ function lowerBottom() {
   if (!props.isLowerBottom) { return; }
   if (page.pageSize * page.pageIndex >= page.total) { return; }
   bottomText.value = '加载中';
-  page.pageIndex++;
+  console.log(page.pageIndex);
+  page.pageIndex = page.pageIndex +1;
   search();
 }
 function upperTop() {

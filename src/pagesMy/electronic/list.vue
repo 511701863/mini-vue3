@@ -22,7 +22,7 @@ onShow(() => {
 });
 function deleteFn(item:any) {
   uni.showModal({
-    title: '撤销授权',
+    title: '确认删除',
     content: '电子围栏删除后，将不在该区域对车辆进行监控。请确认是否继续？',
     confirmColor: '#FF933B',
     success: function (res) {
