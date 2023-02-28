@@ -2,30 +2,39 @@
 import { ref, reactive, Ref, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 
-import PinInput from '@/components/pinInput/myp-one.vue';
+import nxImage from '@/components/nxImage/nxImage.vue';
+
+import type { GrantRecordVo } from '../../api/types/carConfigType';
 
 import dayjs from 'dayjs';
-import { getList, getList2 } from '@/api/car/index';
 import { useRouter } from '@/router/router';
+import { gainGrantDetail, defaultVehicle} from '@/api/my/carManagement';
 import { useRequest } from '../../hooks/useRequest/useRequst';
-import nxImage from '@/components/nxImage/nxImage.vue';
-import nxScrollView from '@/components/nxScrollView/index.vue';
-import { useConfig } from '../../store/modules/config';
+
+const carId:any = ref('');
+const { run: defaultVehicleFn } = useRequest<any, any>(defaultVehicle, {
+  manual: true,
+  onSuccess:() => {
+    gainGrantDetailFn({id:carId.value});
+  }
+});
+const { run: gainGrantDetailFn, data: formData } = useRequest<GrantRecordVo>(gainGrantDetail, {
+  manual: true
+});
 const router = useRouter();
-const {setPin, config} = useConfig();
-const tabNameList = [{
-  label: '我的车辆'
-}, {
-  label: '被授权车辆'
-}];
+onLoad((query) => {
+  const { id } = query;
+  carId.value = id;
+  gainGrantDetailFn({id});
+});
 function setDefault() {
   uni.showModal({
-    title: '撤销授权',
+    title: '默认车辆',
     content: '请确认将此车辆替换为默认车辆？默认车辆将展示在爱车首页',
     confirmColor: '#FF933B',
     success: function (res) {
       if (res.confirm) {
-        setPin(true);
+        defaultVehicleFn({vin:formData.value?.vin});
       } else if (res.cancel) {
         console.log('用户点击取消');
       }
@@ -37,23 +46,19 @@ const active = ref(0);
 
 <template>
   <div class="relative bg-pageBg h-100vh">
-    <div class="p-32rpx flex items-start h-200rpx box-border">
+    <div class="p-32rpx flex formData?s-start bg-pageBg h-200rpx box-border">
       <div>
-        <nx-image
-          :src="'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_car.png'"
-          width="320rpx"
-          height="128rpx"
-        />
+        <image class="w-320rpx h-128rpx" :src="formData?.modelImage" />
       </div>
       <div class="text-grayText ml-12rpx">
         <div class="text-titleMedium font-bold lh-46rpx">
-          凯翼 FX12旗舰版
+          {{ formData?.modelShowName }}
         </div>
         <div class="text-titleSmall lh-46rpx">
-          车牌号:{{ 18234111342 }}
+          车牌号：{{ formData?.carLicense }}
         </div>
         <div class="text-titleSmall lh-46rpx">
-          VIN:{{ 18234111342 }}
+          VIN：{{ formData?.vin }}
         </div>
       </div>
     </div>
@@ -68,32 +73,32 @@ const active = ref(0);
             </div>
             <nx-image
               class="ml-8rpx"
-              src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/carUsing.png"
+              :src="formData?.grantStatus === 1?'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/carUsing.png':formData?.grantStatus === 0?'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/carUseEnd.png':'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/carUseBack.png'"
               width="120rpx"
               height="48rpx"
             />
           </div>
-          <div @click="router.navigateTo({ name: 'carManagementRecord' })">
+          <div @click="router.navigateTo({ name: 'carManagementGainRecord',query:{vin:formData?.vin, name:formData?.modelShowName, carLicense:formData?.carLicense, imgUrl:formData?.modelImage} })">
             控车记录<van-icon name="arrow" />
           </div>
         </div>
         <div class="flex justify-between items-center p-y-48rpx">
           <div class="text-center">
             <p class="text-46rpx font-bold">
-              12月07日
+              {{ dayjs(formData?.grantStartTime).format('MM月DD日') }}
             </p>
             <p class="text-titleSmall text-lightGrayText">
-              12:52
+              {{ dayjs(formData?.grantStartTime).format('HH:mm') }}
             </p>
           </div>
           <div class="border-lightGray border-b-4rpx w-68rpx relative arrow-right">
           </div>
           <div class="text-center">
             <p class="text-46rpx font-bold">
-              12月07日
+              {{ dayjs(formData?.grantEndTime).format('MM月DD日') }}
             </p>
             <p class="text-titleSmall text-lightGrayText">
-              12:52
+              {{ dayjs(formData?.grantEndTime).format('HH:mm') }}
             </p>
           </div>
         </div>
@@ -102,7 +107,7 @@ const active = ref(0);
             车主账号
           </div>
           <div class="text-lightGrayText">
-            12345
+            {{ formData?.grantUserPhone }}
           </div>
         </div>
         <div class="w-622rpx flex justify-between p-y-32rpx">
@@ -110,7 +115,7 @@ const active = ref(0);
             车主姓名
           </div>
           <div class="text-lightGrayText">
-            网络钥匙
+            {{ formData?.grantUserName }}
           </div>
         </div>
         <div class="w-622rpx flex justify-between p-y-32rpx">
@@ -118,7 +123,7 @@ const active = ref(0);
             授权钥匙
           </div>
           <div class="text-lightGrayText">
-            网络钥匙
+            {{ formData?.grantType === 0?'网络钥匙，蓝牙钥匙':'网络钥匙' }}
           </div>
         </div>
         <div class="w-622rpx flex justify-between p-y-32rpx">
@@ -126,10 +131,11 @@ const active = ref(0);
             授权时间
           </div>
           <div class="text-lightGrayText">
-            2022年07月15日17:10
+            {{ dayjs(formData?.createTime).format('YYYY年MM月DD日 HH:mm') }}
           </div>
         </div>
         <button
+          v-if="formData?.grantStatus === 1"
           class="button-white lh-64rpx h-72rpx"
           @click="setDefault"
         >
@@ -137,7 +143,6 @@ const active = ref(0);
         </button>
       </div>
     </div>
-    <PinInput type="box" />
   </div>
 </template>
 <style scoped lang="scss">

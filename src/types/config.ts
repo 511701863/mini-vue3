@@ -1,5 +1,4 @@
 export type AppConfig = {
-  appid:string;
   baseURL:string;
   etcAppid:string;
   baseH5:string;
@@ -7,6 +6,9 @@ export type AppConfig = {
   pinShow:boolean;
   pinFocus:boolean;
   ENV:string;
+  timer:any;
+  pin:'',
+  params:any,
   callBack:(...arg:any[])=>any;
 }
 

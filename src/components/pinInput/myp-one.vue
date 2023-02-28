@@ -1,6 +1,10 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
 import { useConfig } from '../../store/modules/config';
+import { checkHasSetPin, verifyPin, getPublicKey } from '@/api/my/pinConfig';
+import { useRequest } from '../../hooks/useRequest/useRequst';
+import { useRouter } from '@/router/router';
+import { setPublicKey, getRsaPin } from '@/utils/rsa/index';
 type Props = {
   value?: string,
   maxlength?: number,
@@ -12,7 +16,8 @@ type EmitProps = {
   (e: 'finish', value: string): void;
   (e: 'input', value: string): void;
 }
-const {config, setPin} = useConfig();
+const { config, setPin } = useConfig();
+const router = useRouter();
 
 const props = withDefaults(defineProps<Props>(), {
   value: '',
@@ -21,13 +26,44 @@ const props = withDefaults(defineProps<Props>(), {
   isPwd: false,
   type: 'bottom'
 });
+
+const { run: checkPinFn, data: hasPin } = useRequest<boolean>(checkHasSetPin, {
+  manual: true,
+  onSuccess: (res) => {
+    if (res.data) {
+      modelShow.value = true;
+    } else {
+      uni.showModal({
+        title: '设置PIN码',
+        content: '请设置PIN码',
+        confirmColor: '#FF933B',
+        success: function (res) {
+          if (res.confirm) {
+            router.navigateTo({ name: 'pinConfigSetPin' });
+          } else if (res.cancel) {
+            console.log('用户点击取消');
+          }
+        }
+      });
+    }
+  }
+});
+const modelShow = ref<boolean>(false);
+watch(() => config.pinShow, (newV) => {
+  if (newV) {
+    checkPinFn();
+  } else {
+    modelShow.value = false;
+  }
+}, { immediate: true });
 const emits = defineEmits<EmitProps>();
 
 const inputValue = ref('');
 const codeIndex = ref(1);
 const codeArr: any | never[] = ref([]);
 const ranges = ref([1, 2, 3, 4]);
-
+//加密后的pin
+const rsaPin:any = ref('');
 watch(() => props.maxlength, (newV) => {
   if (newV === 6) {
     ranges.value = [1, 2, 3, 4, 5, 6];
@@ -43,16 +79,33 @@ watch(() => props.value, (newV) => {
   }
 }, { immediate: true });
 
+const { run: getPublicKeyFn, data: publicKeyData } = useRequest<{ publicKey: string }>(getPublicKey, {
+  manual: true,
+  onSuccess: (res) => {
+    setPublicKey(publicKeyData.value?.publicKey);
+    rsaPin.value = getRsaPin(codeArr.value.join(''));
+    verifyPinFn({ pin: rsaPin.value });
+  }
+});
+const { run: verifyPinFn } = useRequest<boolean>(verifyPin, {
+  manual: true,
+  onSuccess: (res) => {
+    config.pin = rsaPin.value;
+    setPin(false, Date.now());
+    clear();
+  },
+  onError:() => {
+    setPin(false);
+    clear();
+  }
+});
 function toMakeAndCheck(val: string) {
   const arr = val.split('');
   codeIndex.value = arr.length + 1;
   codeArr.value = arr;
   if (codeIndex.value > Number(props.maxlength)) {
     // emits('finish', codeArr.value.join(''));
-    setTimeout(() => {
-      setPin(false, Date.now());
-      clear();
-    }, 500);
+    getPublicKeyFn();
   }
 }
 
@@ -74,17 +127,12 @@ function clear() {
   codeArr.value = [];
   codeIndex.value = 1;
 }
-function closeDialog(){
+function closeDialog() {
   setPin(false);
 }
 </script>
 <template>
-  <van-dialog
-    use-slot
-    :show-confirm-button="false"
-    :show="config.pinShow"
-    @close="closeDialog"
-  >
+  <van-dialog use-slot :show-confirm-button="false" :show="modelShow" @close="closeDialog">
     <view class="p-16rpx pt-18rpx pb-64rpx rounded-16rpx">
       <view class="flex justify-between">
         <div></div>
@@ -117,7 +165,7 @@ function closeDialog(){
                 </text>
               </block>
               <block v-else>
-                {{ codeArr[index]? codeArr[index] : '' }}
+                {{ codeArr[index] ? codeArr[index] : '' }}
               </block>
             </view>
           </block>

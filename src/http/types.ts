@@ -7,6 +7,7 @@ export interface RequestOptions {
   header?:object,
   loadingText?:string,
   loadingMask?:boolean,
+  checkPin?:boolean
 }
 
 export interface ResponseData<T> {

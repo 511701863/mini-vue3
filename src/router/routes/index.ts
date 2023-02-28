@@ -161,6 +161,13 @@ export const subPackages = [
         }
       },
       {
+        'path': 'carManagement/gainRecord',
+        'name': 'carManagementGainRecord',
+        'style': {
+          'navigationBarTitleText': '控车记录'
+        }
+      },
+      {
         'path': 'carManagement/authRecord',
         'name': 'carManagementAuthRecord',
         'style': {

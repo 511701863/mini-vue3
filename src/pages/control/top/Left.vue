@@ -1,22 +1,19 @@
 <script setup lang="ts">
-import { useRouter } from '@/router/router';
 import { onMounted, ref, reactive, watchEffect, watch, isRef, computed } from 'vue';
+
 import nxImage from '@/components/nxImage/nxImage.vue';
-import { CarInfo, controlItem } from '../type';
+
+import { useRouter } from '@/router/router';
 import { useRequest } from '@/hooks/useRequest/useRequst';
-import { getList, getList2 } from '@/api/car/index';
-import { debounce } from '@/utils/tool/index';
+import dayjs from 'dayjs';
 
 type TopLeftProps = {
-  carInfo?:CarInfo
+  carInfo?: Control.VehiclLoveAo
 }
 
 const router = useRouter();
 const props = defineProps<TopLeftProps>();
-console.log(props.carInfo);
 
-const state = reactive({
-});
 </script>
 
 <template>
@@ -27,17 +24,18 @@ const state = reactive({
       height="794rpx"
     />
     <div class="car-img">
-      <image src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_car.png" />
+      <image :src="props.carInfo?.modelImage" />
     </div>
     <div class="car-info container">
       <div class="flex">
         <div class="address">
-          成都市高新区茂业中心
+          {{ props.carInfo?.vehicleCondition?.reportAddress || '--' }}
         </div>
         <u-icon name="arrow-right" color="#262626" size="20" />
       </div>
       <div class="time">
-        2022/06/16 15:24:41
+        {{ props.carInfo?.vehicleCondition?.reportTime ?
+          dayjs(props.carInfo?.vehicleCondition?.reportTime).format('YYYY/MM/DD HH:mm:ss ') : '--' }}
       </div>
       <div class="mile-info">
         <div class="mile-title">
@@ -45,7 +43,8 @@ const state = reactive({
         </div>
         <div class="flex value-box">
           <div class="mile-value">
-            {{ props.carInfo?.mile }}
+            {{ props.carInfo?.vehicleCondition?.mileage !== '无效' && props.carInfo?.vehicleCondition?.mileage ? props.carInfo
+              ?.vehicleCondition?.mileage : '--' }}
           </div>
           <div class="mile-icon">
             km
@@ -58,7 +57,8 @@ const state = reactive({
         </div>
         <div class="flex value-box">
           <div class="mile-value">
-            {{ props.carInfo?.electricity }}
+            {{ props.carInfo?.vehicleCondition?.oil !== '无效' && props.carInfo?.vehicleCondition?.oil ? props.carInfo
+              ?.vehicleCondition?.oil : '--' }}
           </div>
           <div class="mile-icon">
             %

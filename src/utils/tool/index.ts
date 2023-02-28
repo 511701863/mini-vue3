@@ -68,7 +68,7 @@ export function throttle(func: Function, time: number, immediate = false) {
 
 }
 // eslint-disable-next-line @typescript-eslint/ban-types
-export function debounce(func: Function, time: number, immediate = false) {
+export function debounce(func: Function, time: number, immediate = true) {
   let timer: NodeJS.Timeout | null = null;
   return (...args: any) => {
       if (timer) {

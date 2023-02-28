@@ -1,60 +1,84 @@
 <script setup lang="ts">
-import { ref, reactive, Ref, computed } from 'vue';
+import { ref, reactive, Ref, computed, watch } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 
 import PinInput from '@/components/pinInput/myp-one.vue';
 
-import { pushMsg, getList } from '@/api/car/index';
+import type { VehicleAppDetailAo } from '../../api/types/carConfigType';
+
+import { findVehicleDetailInfo, defaultVehicle, unBindVehicle } from '@/api/my/carManagement';
+import { checkRes, stolenAlarm } from '../../api/control/index';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
-import nxImage from '@/components/nxImage/nxImage.vue';
-import nxScrollView from '@/components/nxScrollView/index.vue';
 import { useConfig } from '../../store/modules/config';
+import { useCheckRes } from '../../hooks/useRequest/useCheckRes';
 
 const { setPin, config } = useConfig();
 const router = useRouter();
-const carInfo = ref({
-  warning: false
+const { run: defaultVehicleFn } = useRequest<any, any>(defaultVehicle, {
+  manual: true,
+  onSuccess:() => {
+    findVehicleDetailInfoFn({ vin:carVin.value });
+  }
+});
+const carVin: any = ref('');
+const { run: findVehicleDetailInfoFn, data: carData } = useRequest<VehicleAppDetailAo>(findVehicleDetailInfo, {
+  manual: true
+});
+const { run: unBindVehicleFn} = useRequest(unBindVehicle, {
+  manual: true,
+  onSuccess:() => {
+    router.navigateBack({});
+  }
+});
+onLoad((query) => {
+  const { vin } = query;
+  carVin.value = vin;
+  findVehicleDetailInfoFn({ vin });
 });
 function setDefault() {
   uni.showModal({
-    title: '撤销授权',
+    title: '默认车辆',
     content: '请确认将此车辆替换为默认车辆？默认车辆将展示在爱车首页',
     confirmColor: '#FF933B',
     success: function (res) {
       if (res.confirm) {
-        setPin(true);
+        defaultVehicleFn({vin:carVin.value});
       } else if (res.cancel) {
         console.log('用户点击取消');
       }
     }
   });
 }
+const authType = {
+  1: '未实名',
+  2: '认证中',
+  3: '认证成功',
+  '-1': '认证失败'
+};
 function unBind() {
   uni.showModal({
     title: '撤销授权',
-    content: `您正在解绑车牌号为${'川A·88888'}的车辆，请确认是否继续?`,
+    content: `您正在解绑车牌号为${carData.value?.carLicense}的车辆，请确认是否继续?`,
     confirmColor: '#FF933B',
     success: function (res) {
       if (res.confirm) {
-        setPin(true);
+        setPin(true, 0, () => {unBindVehicleFn({vin:carVin.value});});
       } else if (res.cancel) {
         console.log('用户点击取消');
       }
     }
   });
 }
-const { run, data } = useRequest(getList, {
-  manual: true,
-  onSuccess: () => {
-    carInfo.value.warning = !carInfo.value.warning;
-  }
-});
-function changeWarning(num:number) {
+
+const { run:runCheck, data:checkData } = useCheckRes(stolenAlarm, findVehicleDetailInfoFn, {params:{ vin:carVin.value }});
+
+function changeWarning() {
   return () => {
-    run({ pageSize: num, pageIndex: 2 });
+    runCheck({ vin: carVin.value, destStatus: carData.value?.isTheftAlarm ? 'OFF' : 'ON' });
   };
 }
+
 </script>
 
 <template>
@@ -62,22 +86,25 @@ function changeWarning(num:number) {
     <div class="mt-180rpx relative w-686rpx bg-white mb-32rpx rounded-16rpx p-32rpx box-border">
       <div class="flex flex-wrap justify-center items-center">
         <div class="flex mt-123rpx">
-          <div class="w-64rpx h-36rpx border-1rpx border-buttonColor mr-6rpx text-24rpx lh-36rpx text-center">
+          <div
+            v-if="carData?.defaultFlag"
+            class="w-64rpx h-36rpx border-1rpx border-buttonColor mr-6rpx text-24rpx lh-36rpx text-center"
+          >
             默认
           </div>
           <div class="font-bold">
-            COWIN FX12旗舰版
+            {{ carData?.modelShowName }}
           </div>
         </div>
         <div class="mt-14rpx text-24rpx text-grayText w-622rpx text-center">
-          VIN：COWINKEY00000000
+          VIN：{{ carData?.vin }}
         </div>
         <div class="w-622rpx flex justify-between p-y-32rpx mt-80rpx">
           <div>
             4S店
           </div>
           <div>
-            成都国贸经销商
+            {{ carData?.salesAreaName }}
           </div>
         </div>
         <div class="w-622rpx flex justify-between p-y-32rpx">
@@ -85,7 +112,7 @@ function changeWarning(num:number) {
             发动机号
           </div>
           <div>
-            FDJ80991
+            {{ carData?.engineNumber }}
           </div>
         </div>
         <div class="w-622rpx flex justify-between p-y-32rpx">
@@ -93,7 +120,7 @@ function changeWarning(num:number) {
             车牌号
           </div>
           <div>
-            川A·VV666
+            {{ carData?.carLicense }}
           </div>
         </div>
         <div class="w-622rpx flex justify-between p-y-32rpx">
@@ -101,7 +128,7 @@ function changeWarning(num:number) {
             实名认证
           </div>
           <div>
-            未认证
+            {{ authType[carData?.authState || -1] }}
           </div>
         </div>
         <div class="w-622rpx flex justify-between p-y-32rpx">
@@ -109,19 +136,23 @@ function changeWarning(num:number) {
             防盗告警
           </div>
           <div>
-            <van-switch :checked="carInfo.warning" active-color="#00C682" @change="setPin(true, 0, changeWarning(4))" />
+            <van-switch
+              :checked="carData?.isTheftAlarm"
+              active-color="#00C682"
+              @change="setPin(true, 0, changeWarning())"
+            />
           </div>
         </div>
       </div>
       <div class="absolute top--132rpx right-45rpx">
         <image
           class="w-600rpx h-258rpx"
-          src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_car.png"
+          :src="carData?.modelImage"
         />
       </div>
     </div>
     <div>
-      <button class="button-white" @click="setDefault">
+      <button v-if="!carData?.defaultFlag" class="button-white" @click="setDefault">
         设为默认车辆
       </button>
       <button class="button-primary w-686rpx  mt-16rpx" @click="unBind">

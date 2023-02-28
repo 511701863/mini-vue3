@@ -16,8 +16,9 @@ import { CarInfo, controlItem } from './type';
 
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
-import { getList, getList2 } from '@/api/car/index';
 import { debounce } from '../../utils/tool/index';
+import { getCarList, defaultVehicle } from '../../api/my/carManagement';
+import { findVehicleDefault } from '../../api/control/index';
 
 const router = useRouter();
 const swiperIndex = ref<number>(0);
@@ -25,78 +26,32 @@ const controlIndex = ref<number>(0);
 const swiperCurrent = ref<number>(0);
 const carSelectShow = ref<boolean>(false);
 const isLogin = ref(false);
+const scrollRef:any = ref(null);
 
+const { run: getCarListFn, data: carList } = useRequest<MyCenter.VehicleLoveList[]>(getCarList, {
+  manual: true,
+  onSuccess:() => {
+    scrollRef.value?.search();
+  }
+});
+//切换默认车辆
+const { run: defaultVehicleFn } = useRequest<any, any>(defaultVehicle, {
+  manual: true,
+  onSuccess:() => {
+    getCarListFn();
+  }
+});
 onShow(() => {
   isLogin.value = uni.getStorageSync('isLogin');
-});
-const state = reactive({
-  carInfo: {
-    value: '1234',
-    name: '川A123456',
-    mile: '456',
-    electricity: '70'
-  } as CarInfo
-});
-const carList = ref<CarInfo[]>([
-  {
-    value: '1234',
-    name: '川A123456',
-    mile: '456',
-    electricity: '75'
-  },
-  {
-    value: '1334',
-    name: '川A12256',
-    mile: '480',
-    electricity: '80'
-  },
-  {
-    value: '1434',
-    name: '川A128856',
-    mile: '490',
-    electricity: '90'
+  if(isLogin.value){
+    getCarListFn();
   }
-]);
-
+});
 const isShow = ref(false);
 const btnId = ref(2);
 
-// type GetBanner = Array<{ type: string }>
-// type GetBannerParams = {
-//   name: string;
-// }
-// getList2<GetBannerParams, GetBanner>({ name: '12345' }).then((res) => {
-//   console.log(res[0].type);
-// });
-// function getUsername(): Promise<any> {
-// 	return new Promise((resolve, reject) => {
-// 		setTimeout(() => {
-// 			resolve(`${String(Date.now())}`);
-// 		}, 1000);
-// 	});
-// }
-// const number = ref('test');
-
-// const { run, data} = useRequest<GetBanner, GetBannerParams[]>(getList2, {
-//   manual: true
-// });
-// watch(data, (n) => {
-//   const num = data.value ?? [];
-//   number.value = 'build';
-//   console.log(num);
-// });
-// const { run: run2, data: data2} = useRequest<GetBanner, GetBannerParams[]>(getList, {
-//   manual: true,
-//   defaultParmas:[{name:'3333'}],
-//   refreshDeps:[() => number],
-//   refreshDepsParams:computed(() => [{name:'12345'}])
-// });
-
-// onMounted(() => {
-//   getList();
-// });
 function confirm(i: any) {
-  state.carInfo = carList.value.find((item) => item.value === i.detail.value) as CarInfo;
+  defaultVehicleFn({vin:i.detail.value});
 }
 function closeSelect() {
   carSelectShow.value = false;
@@ -117,20 +72,31 @@ function changeBottomSwiper(e: any) {
   let current = e.detail.current;
   controlIndex.value = current;
 }
-
+const carDetail:any = ref({});
+function searchSuccess(value:any){
+  console.log(value);
+  carDetail.value = value;
+}
 </script>
 
 <template>
   <div style="overflow:hidden">
     <NoCar v-show="!isLogin" />
     <div v-show="isLogin">
-      <nxScrollView :cb-fn="getList" :is-lower-bottom="false" :params="{pageSize:10}">
-        <template #list="{ list }">
+      <nxScrollView
+        ref="scrollRef"
+        :cb-fn="findVehicleDefault"
+        :is-lower-bottom="false"
+        :params="{pageSize:10}"
+        :manual="true"
+        @on-success="searchSuccess"
+      >
+        <template #list="{ list:detail }">
           <view class="content">
             <div class="top-box">
               <div class="car-title" @click="selectCar">
                 <div class="mr-22rpx">
-                  {{ state.carInfo.name }}
+                  {{ detail.carLicense || detail.modelShowName }}
                 </div>
                 <van-icon name="play" size="32rpx" class="rotate-90" />
               </div>
@@ -155,20 +121,20 @@ function changeBottomSwiper(e: any) {
               </div>
               <swiper :current="swiperCurrent" class="w-770rpx h-794rpx" :duration="250" @change="changeSwiper">
                 <swiper-item class="swiper-item">
-                  <TopLeft :car-info="state.carInfo" />
+                  <TopLeft :car-info="detail" />
                 </swiper-item>
                 <swiper-item class="swiper-item">
-                  <TopRight />
+                  <TopRight :car-info="detail" />
                 </swiper-item>
               </swiper>
             </div>
             <div class="bottom-box container pt-92rpx">
               <swiper :current="controlIndex" :duration="250" class="h-1000rpx" @change="changeBottomSwiper">
                 <swiper-item class="control-swiper-item">
-                  <BottomLeft v-model:dialog="isShow" v-model:id="btnId" />
+                  <BottomLeft v-model:dialog="isShow" v-model:id="btnId" :car-info="detail" @control-success="scrollRef?.search" />
                 </swiper-item>
                 <swiper-item class="control-swiper-item">
-                  <BottomRight />
+                  <BottomRight :car-info="detail" />
                 </swiper-item>
               </swiper>
             </div>
@@ -180,13 +146,13 @@ function changeBottomSwiper(e: any) {
     <van-action-sheet
       title="选择车辆"
       :show="carSelectShow"
-      :actions="carList"
+      :actions="carList?.map(item => { return { name: (item.carLicense || '无车牌')+(item.defaultFlag ? '（默认车辆）':''), value: item.vin, subname:(item.vin+`(${item.isGrant?'授权车辆':''})`) } }) || []"
       close-on-click-overlay
       close-on-click-action
       @select="confirm"
       @close="closeSelect"
     />
-    <ControlDiaLog v-model="isShow" :btn-id="btnId" />
+    <ControlDiaLog v-model="isShow" :btn-id="btnId" :car-info="carDetail" @control-success="scrollRef?.search" />
   </div>
 </template>
 <style lang="scss" scoped>

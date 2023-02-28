@@ -9,67 +9,89 @@ import { useRouter } from '@/router/router';
 import { useRequest } from '@/hooks/useRequest/useRequst';
 import { getList, getList2 } from '@/api/car/index';
 import { debounce } from '@/utils/tool/index';
-
+import { collection} from '@/api/control/index';
+type BottomLeftProps = {
+  carInfo: Partial<Control.VehiclLoveAo>,
+}
+const props = withDefaults(defineProps<BottomLeftProps>(), {
+});
 const router = useRouter();
 
 const state = reactive({
   data: {}
 });
-const btnList = ref<Partial<controlItem>[]>([
-//   {
-//   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_1.png',
-//   check: false,
-//   name: '车辆诊断'
-// },
-// {
-//   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_2.png',
-//   check: false,
-//   name: '行车记录'
-// },
-// {
-//   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_3.png',
-//   check: false,
-//   name: '车内自拍'
-// },
-// {
-//   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_4.png',
-//   check: false,
-//   name: '流量管理'
-// },
-{
-  src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_5.png',
-  check: false,
-  routerName:'maintenanceAdd',
-  name: '维保预约'
-},
-{
-  src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_6.png',
-  check: false,
-  routerName:'locationService',
-  name: '位置服务'
-}
-// {
-//   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_7.png',
-//   check: false,
-//   name: '用户手册'
-// },
-// {
-//   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_8.png',
-//   check: false,
-//   name: '充电管理'
-// },
-// {
-//   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_9.png',
-//   check: false,
-//   name: '升级管理'
-// }
-]);
+const btnSource:controlItem[] = [
+  //   {
+  //   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_1.png',
+  //   check: false,
+  //   name: '车辆诊断'
+  // },
+  // {
+  //   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_2.png',
+  //   check: false,
+  //   name: '行车记录'
+  // },
+  // {
+  //   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_3.png',
+  //   check: false,
+  //   name: '车内自拍'
+  // },
+  // {
+  //   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_4.png',
+  //   check: false,
+  //   name: '流量管理'
+  // },
+  {
+    src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_5.png',
+    check: false,
+    routerName: 'maintenanceAdd',
+    name: '维保预约',
+    value:'maintenanceSubscribe'
+  },
+  {
+    src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_6.png',
+    check: false,
+    routerName: 'locationService',
+    name: '位置服务',
+    value:'locationServe'
+  }
+  // {
+  //   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_7.png',
+  //   check: false,
+  //   name: '用户手册'
+  // },
+  // {
+  //   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_8.png',
+  //   check: false,
+  //   name: '充电管理'
+  // },
+  // {
+  //   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_2_9.png',
+  //   check: false,
+  //   name: '升级管理'
+  // }
+];
+const btnList = ref<controlItem[]>([]);
+  const { run: collectionFnRight, data: abilityListRight } = useRequest<Control.AbilityVo>(collection, {
+  manual: true,
+  onSuccess:() => {
+    const hasCollecList = abilityListRight.value?.abilityCollections?.map((item) => item.ability);
+    btnList.value = btnSource.filter((item) => {
+      return hasCollecList?.includes(item.value);
+    });
+  }
+});
+watch(() => props.carInfo, (nVal) => {
+  if (nVal?.vin) {
+    collectionFnRight({ vin:nVal.vin, abilityType: 1 });
+  }
+}, { deep: true, immediate:true});
 function clickControl(item: Partial<controlItem>) {
- router.navigateTo({name:item.routerName});
+  router.navigateTo({ name: item.routerName, query:{vin:props.carInfo?.vin} });
 }
 function call() {
   uni.makePhoneCall({
-    phoneNumber: '400-8877-668',
+    phoneNumber: '400-666-7777',
     success: function () {
       console.log('拨打电话成功');
     },
@@ -82,13 +104,9 @@ function call() {
 
 <template>
   <div>
-    <div class="control-card  flex flex-wrap">
+    <div v-if="btnList.length" class="control-card  flex flex-wrap">
       <div v-for="(item, index) in btnList" :key="index" class="icon-box" @click="clickControl(item)">
-        <nx-image
-          :src="item.src"
-          width="96rpx"
-          height="96rpx"
-        />
+        <nx-image :src="item.src" width="96rpx" height="96rpx" />
         <div class="text-medium mt-mini">
           {{ item.name }}
         </div>

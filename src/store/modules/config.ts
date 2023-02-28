@@ -7,33 +7,35 @@ const { logout } = useUser();
 
 export const useConfig = defineStore('config', () => {
   const config: AppConfig = reactive({
-    appid: 'wx2642e761518bb7d5',
     baseURL: 'https://fdt-gateway-customer-tspstaging.dm.newcowin.com',
     baseH5: 'https://community-webapp-staging.newtsp.newcowin.com/#/community/agreement',
-    ENV:'dev',
+    ENV: 'dev',
     etcAppid: '',
+    timer: null,
     //pin有效期
     pinTime: 0,
     pinShow: false,
+    pin: '',
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    callBack:() => {},
+    callBack: () => { },
+    params: '',
     pinFocus: false
   });
   const envConfig = {
     'dev': {
       url: 'https://fdt-gateway-customer-tspstaging.dm.newcowin.com',
       h5Url: 'https://community-webapp-staging.newtsp.newcowin.com/#/community/agreement',
-      ENV:'dev'
+      ENV: 'dev'
     },
     'prod': {
       url: 'https://lqdm-app-dev.dflzm.com/customer',
       h5Url: 'https://tsp-community-webapp.kayyi.com/#/community/agreement',
-      ENV:'prod'
+      ENV: 'prod'
     },
     'uat': {
       url: 'https://fdt-gateway-bside-tspstaging.dm.newcowin.com',
       h5Url: 'https://community-webapp-staging.newtsp.newcowin.com/#/community/agreement',
-      ENV:'uat'
+      ENV: 'uat'
     }
   };
   function setConfigStorage() {
@@ -63,21 +65,37 @@ export const useConfig = defineStore('config', () => {
     }
   });
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  function setPin(visible: boolean, time = 0, callBack:(...arg:any[])=>any = () => {}, params:any = {}) {
-    //打开pin输入之前验证pin是否过期 没过期直接执行操作
+  function setPin(visible: boolean, time = 0, callBack: (...arg: any[]) => any = () => { }, params: any = '') {
+    if (params) {
+      config.params = params;
+    }
+    //打开pin输入之前验证pin是否过期 没过期直接执行操作 执行后清除参数
     if (visible && config.pinTime > Date.now()) {
-      callBack(params);
+      if (!config.timer) {
+        callBack(config.params);
+        config.params = '';
+      }
+      config.timer=setTimeout(() => {
+        config.timer = null;
+      }, 1000);
       return;
     }
     config.pinShow = visible;
     //过期后打开pin验证并存入操作函数
-    if(visible){
+    if (visible) {
       config.callBack = callBack;
     }
-    //每次重新输入成功后存储输入时间 执行操作
+    //每次重新输入成功后存储输入时间 执行操作 执行后清除参数
     if (time) {
-      config.callBack(params);
-      config.pinTime = time + 5000;
+      if (!config.timer) {
+        config.callBack(config.params);
+        config.pinTime = time + 900000;
+        config.params = '';
+      }
+      config.timer=setTimeout(() => {
+        config.timer = null;
+      }, 1000);
+
       //  config.pinTime = time + 900000;
     }
   }

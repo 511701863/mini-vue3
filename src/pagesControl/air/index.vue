@@ -4,74 +4,59 @@ import { onMounted, ref, reactive } from 'vue';
 import nxImage from '@/components/nxImage/nxImage.vue';
 
 import { useRouter } from '@/router/router';
+import { useRequest } from '../../hooks/useRequest/useRequst';
+import { findVehicleDefault } from '../../api/control/index';
 
 const router = useRouter();
-const swiperIndex = ref<number>(0);
-const controlIndex = ref<number>(1);
+const controlIndex = ref<number>(0);
 const carSelectShow = ref<boolean>(false);
-const state = reactive({
-
+  const { run: findVehicleDefaultFn, data: carInfo } = useRequest<Control.VehiclLoveAo>(findVehicleDefault, {
+  manual: false
 });
-
 const airList = ref([{
   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_8.png',
   checkSrc: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_8_s.png',
   check: false,
+  checkCode: 'acHeatUpSts',
+  id: 7,
   name: '急速升温'
 },
 {
   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_7.png',
   checkSrc: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_7_s.png',
   check: false,
+  checkCode: 'acHeatUpSts',
+  id: 8,
   name: '极速降温'
 },
 {
   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_9.png',
   checkSrc: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_9_s.png',
   check: false,
+  checkCode: 'acHeatUpSts',
+  id: 9,
   name: '前除霜'
 },
 {
   src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_10.png',
   checkSrc: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_10_s.png',
   check: false,
+  checkCode: 'acHeatUpSts',
+  id: 10,
   name: '空气净化'
 }]);
-// onMounted(() => {
-// });
 
-function closeSelect() {
-  carSelectShow.value = false;
-}
-function selectCar() {
-  carSelectShow.value = true;
-}
 function clickTab(e: any) {
   controlIndex.value = e.target.dataset.index;
-  // wx.exitMiniProgram({
-  //     success: function(res:any) {
-  //       console.log(res);
-
-  //     }
-  // });
 }
 function changeSwiper(e: any) {
   let current = e.detail.current;
   controlIndex.value = current;
 }
-// 由于swiper的内部机制问题，快速切换swiper不会触发dx的连续变化，需要在结束时重置状态
-// swiper滑动结束，分别设置tabs和swiper的状态
-// function bottomAnimationfinish(e: any) {
-//   let current = e.detail.current;
-//   controlIndex.value = current;
-// }
-
 function clickControl(item: any) {
   item.check = !item.check;
 }
-function goToAir() {
-  router.navigateTo({ name: 'airControl' });
-}
+
 </script>
 
 <template>

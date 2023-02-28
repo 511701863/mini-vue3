@@ -7,9 +7,8 @@ import PinInput from './components/myp-one.vue';
 import { submitPhoneAndCode, resendSubmitPhone, submitPhone } from '@/api/my/pinConfig';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
-import { useUser } from '../../store/modules/user';
 
-const { userState } = useUser();
+const phoneNo = ref(uni.getStorageSync('userInfo').phoneNo);
 const router = useRouter();
 const time = ref(60 * 1000);
 const reloadFlag = ref(false);
@@ -17,7 +16,7 @@ const pin: Ref<string> = ref('');
 const code: Ref<string> = ref('');
 const { run: submitPhoneFn } = useRequest<boolean>(submitPhone, {
   manual: false,
-  defaultParmas: [{ mobile: userState.userInfo.mobile }],
+  defaultParmas: [{ mobile: uni.getStorageSync('userInfo').phoneNo }],
   onSuccess: (res) => {
     uni.showToast({
       title: '已发送短信到您的手机',
@@ -37,13 +36,13 @@ const { run: resendSubmitPhoneFn } = useRequest<boolean>(resendSubmitPhone, {
 const { run: submitPhoneAndCodeFn } = useRequest<boolean>(submitPhoneAndCode, {
   manual: true,
   onSuccess: (res) => {
-    router.navigateTo({ name: 'pinConfigSetPin', query: { original: true, phone: userState.userInfo.mobile, code:code.value } });
+    router.navigateTo({ name: 'pinConfigSetPin', query: { original: true, phone: uni.getStorageSync('userInfo').phoneNo, code:code.value } });
   }
 });
 watch(pin, (newPin) => {
   if (newPin) {
     submitPhoneAndCodeFn({
-      mobile: userState.userInfo.mobile,
+      mobile: uni.getStorageSync('userInfo').phoneNo,
       code: newPin
     });
     code.value = newPin;
@@ -51,7 +50,7 @@ watch(pin, (newPin) => {
 });
 function reSend() {
   reloadFlag.value = false;
-  resendSubmitPhoneFn({ mobile: userState.userInfo.mobile });
+  resendSubmitPhoneFn({ mobile: uni.getStorageSync('userInfo').phoneNo });
 }
 </script>
 
@@ -61,7 +60,7 @@ function reSend() {
       请输入验证码
     </div>
     <div class="text-titleSmall mt-12rpx mb-72rpx text-gray">
-      验证码已发送至 <span class="text-warn">{{ userState.userInfo.mobile }}</span>
+      验证码已发送至 <span class="text-warn">{{ phoneNo }}</span>
     </div>
     <PinInput v-model="pin" type="box" :maxlength="6" />
     <div class="text-center text-warn text-titleMedium">

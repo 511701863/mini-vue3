@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, Ref, computed, watch } from 'vue';
+import { ref, reactive, Ref, computed, watch, nextTick } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 
 import nxImage from '@/components/nxImage/nxImage.vue';
@@ -7,6 +7,7 @@ import ControlDiaLog from './components/ControlDiaLog.vue';
 
 import type { TextData, Path, markersData } from './type';
 
+import qqmapsdk from '@/utils/sdk/qq-map-sdk/index';
 import dayjs from 'dayjs';
 import { sendToCar, getCarLocation } from '@/api/control/location';
 import { uniqueFunc, getDistance } from '@/utils/tool/index';
@@ -18,12 +19,24 @@ const { run: getCarLocationFn, data } = useRequest<Control.VehicleLocationAo>(ge
   manual: true,
   onSuccess: () => {
     const params: any = data.value;
+    if (data.value?.longitude === 0 || data.value?.latitude === 0) {
+      latitude.value = uni.getStorageSync('latitude');
+      longitude.value = uni.getStorageSync('longitude');
+      createMarker([]);
+      return;
+    }
     myAmapFun.getRegeo({
       location: `${data.value?.longitude},${data.value?.latitude}`,
       success: (res: any) => {
         state.chosen.id = 1;
-        latitude.value = params.latitude;
-        longitude.value = params.longitude;
+        params.latitude = Number(params.latitude?.toFixed(6));
+        params.longitude = Number(params.longitude?.toFixed(6));
+        nextTick(() => {
+          latitude.value = params.latitude;
+          longitude.value = params.longitude;
+          let mapCtx = wx.createMapContext('myMap');
+          mapCtx.moveToLocation({ latitude: params.latitude, longitude: params.longitude });
+        });
         //车辆所在地信息
         params.name = res[0].regeocodeData.addressComponent.building?.name ?? '';
         params.address = res[0].regeocodeData.formatted_address ?? '';
@@ -38,30 +51,26 @@ const { run: sendToCarFn } = useRequest(sendToCar, {
   manual: true,
   onSuccess: () => {
     uni.showToast({
-      title:'发送成功',
-      icon:'none'
+      title: '发送成功',
+      icon: 'none'
     });
   }
 });
 let myAmapFun = new AMap.AMapWX({ key: 'cf893f474862b6533054310120072d17' });
-const latitude: Ref<number> = ref(0);
-const longitude: Ref<number> = ref(1);
-const scale: Ref<number> = ref(5);
-const address: Ref<string> = ref('');
-const addName: Ref<string> = ref('');
-const addFlag = ref(true);
+const latitude = ref(uni.getStorageSync('latitude'));
+const longitude = ref(uni.getStorageSync('longitude'));
+const scale: Ref<number> = ref(15);
 const isShow = ref(false);
 const state = reactive({
   markers: [] as Path[],
   markersData: [] as markersData,
   chosen: {} as Path
 });
+const carVin: any = ref('');
 onLoad((query) => {
   const { vin } = query;
-  getCarLocationFn({ vin: 'LUYDG2CB1NA775615' });
-
-  address.value = uni.getStorageSync('address');
-  addName.value = uni.getStorageSync('addName');
+  carVin.value = vin;
+  getCarLocationFn({ vin });
 });
 const router = useRouter();
 
@@ -74,31 +83,34 @@ function createMarker(data: any) {
     id: 0,
     width: '122rpx',
     height: '134rpx',
-    iconPath: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/self.png',
-    address: address.value,
-    name: addName.value,
+    iconPath: uni.getStorageSync('userInfo').headPortrait || 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/self.png',
+    address: uni.getStorageSync('address'),
+    name: uni.getStorageSync('addName'),
     latitude: uni.getStorageSync('latitude'),
     longitude: uni.getStorageSync('longitude')
   }];
-  data[0].iconPath = 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/carTop.png'; //如：..­/..­/img/marker_checked.png
-  data[0].width = '48rpx';
-  data[0].height = '96rpx';
-  data[0].id = 1;
-  markerList.push(data[0]);
+  if (data.length) {
+    data[0].iconPath = 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/carTop.png'; //如：..­/..­/img/marker_checked.png
+    data[0].width = '48rpx';
+    data[0].height = '96rpx';
+    data[0].id = 1;
+    markerList.push(data[0]);
+  }
   state.markers = markerList;
   console.log(state.markers);
 }
 function restMap() {
-  scale.value = 5;
-  getCarLocationFn({ vin: 'LUYDG2CB1NA775615' });
+  getCarLocationFn({ vin: carVin.value });
+  let mapCtx = wx.createMapContext('myMap');
+  mapCtx.moveToLocation();
 }
-function send () {
+function send() {
   sendToCarFn({
-    detailedAddress:state.chosen.address,
-    latitude:state.chosen.latitude,
-    longitude:state.chosen.longitude,
-    position:state.chosen.name,
-    vin:'LUYDG2CB1NA775615'
+    detailedAddress: state.chosen.address,
+    latitude: state.chosen.latitude,
+    longitude: state.chosen.longitude,
+    position: state.chosen.name,
+    vin: carVin.value
   });
 }
 function openEnjoy() {
@@ -187,7 +199,7 @@ watch(searchInput, (n) => {
 <template>
   <div class="relative">
     <map
-      id="map"
+      id="myMap"
       class="map"
       :longitude="longitude"
       :latitude="latitude"
@@ -206,7 +218,7 @@ watch(searchInput, (n) => {
       </div>
       <scroll-view v-if="onFocusFlag" :scroll-y="true" class="mt-20rpx w-686rpx h-1280rpx bg-white rounded-32rpx">
         <div v-for="(item) in tips" :key="item.name" @click="bindSearch(item)">
-          <div v-show="item.location" class="flex justify-between items-center p-32rpx">
+          <div v-show="item.location?.length" class="flex justify-between items-center p-32rpx">
             <nx-image
               src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/local.png"
               width="32rpx"
@@ -272,10 +284,7 @@ watch(searchInput, (n) => {
           <button class="button-white w-320rpx" @click="openEnjoy">
             导航
           </button>
-          <button
-            class="button-primary w-320rpx"
-            @click="send"
-          >
+          <button class="button-primary w-320rpx" @click="send">
             发送到车
           </button>
         </div>

@@ -16,15 +16,14 @@ const params = reactive({
   vin:'',
   modelName:'',
   imgUrl:'',
-  userId:'',
+  userId:uni.getStorageSync('userInfo').userId,
   carLicense:''
 });
 onLoad((query) => {
-  const { vin, name, carLicense, imgUrl, gainUserId } = query;
+  const { vin, name, carLicense, imgUrl } = query;
   params.vin = vin ?? '';
   params.modelName = name ?? '';
   params.carLicense = carLicense ?? '';
-  params.userId = gainUserId ?? uni.getStorageSync('userInfo').userId;
   params.imgUrl = imgUrl ?? '';
 });
 onMounted(() => {
@@ -50,7 +49,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <nxScrollView ref="scrollRef" :cb-fn="recordHistory" :header-height="200" :params="{pageSize:10,vin:params.vin,userId:params.userId}" :manual="true">
+    <nxScrollView ref="scrollRef" :cb-fn="recordHistory" :header-height="200" :params="{pageSize:5,vin:params.vin,userId:params.userId}" :manual="true">
       <template #list="{ list }">
         <div class="p-32rpx">
           <div v-for="(item,index) in list as RecordHistory[]" :key="index">
@@ -68,7 +67,7 @@ onMounted(() => {
                   操作内容
                 </div>
                 <div>
-                  {{ item.controlFunction }}
+                  {{ item.controlFunctionStr }}
                 </div>
               </div>
               <div class="w-622rpx flex justify-between p-y-12rpx text-titleMedium">

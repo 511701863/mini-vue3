@@ -7,7 +7,7 @@ import nxInput from '@/components/nxInput/nxInput.vue';
 import NxCheckBox from '@/components/nxCheckbox/index.vue';
 import NxSelect from '@/components/nxSelect/nxSelect.vue';
 
-import { getCarList } from '@/api/my/carConfig';
+import { getCarList } from '@/api/my/carManagement';
 import { addElectric, updateElectric } from '@/api/my/electronic';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';

@@ -4,23 +4,43 @@ import { onLoad } from '@dcloudio/uni-app';
 
 import nxInput from '@/components/nxInput/nxInput.vue';
 
-import { pushMsg, getList } from '@/api/car/index';
+import { judgeVehicleUserByVin, findVehicleInfo, findVehicleInfoByScan } from '@/api/my/carManagement';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
 import nxImage from '@/components/nxImage/nxImage.vue';
-
 const router = useRouter();
-const carInfo = ref({
-  warning: false
-});
+
 const formData:Record<string, any> = reactive({
-  name:'',
+  engineNumber:'',
   vin:''
 });
-const { run, data } = useRequest(getList, {
+const { run:judgeVehicleUserByVinFn, data:carStatus } = useRequest(judgeVehicleUserByVin, {
   manual: true,
   onSuccess: () => {
-    carInfo.value.warning = !carInfo.value.warning;
+    if(carStatus){
+      if(activeNames.value === '1'){
+        findVehicleInfoByScanFn(formData);
+      }else{
+        findVehicleInfoFn(formData);
+      }
+    }else{
+      uni.showToast({
+        title:'车辆已绑定其他车主',
+        icon:'none'
+      });
+    }
+  }
+});
+const { run:findVehicleInfoFn, data:carInfo } = useRequest(findVehicleInfo, {
+  manual: true,
+  onSuccess: () => {
+      router.navigateTo({name:'carManagementBindCarConfirm', query:{info:JSON.stringify(carInfo.value)}});
+  }
+});
+const { run:findVehicleInfoByScanFn, data:carInfoScan } = useRequest(findVehicleInfoByScan, {
+  manual: true,
+  onSuccess: () => {
+      router.navigateTo({name:'carManagementBindCarConfirm', query:{info:JSON.stringify(carInfoScan.value)}});
   }
 });
 const activeNames =ref('1');
@@ -37,7 +57,7 @@ function scanCode(){
 });
 }
 function nextTap(){
-  router.navigateTo({name:'carManagementBindCarConfirm'});
+  judgeVehicleUserByVinFn({vin:formData.vin});
 }
 const submitDisabled = computed(() => {
   let flag = false;
@@ -70,8 +90,8 @@ const submitDisabled = computed(() => {
         </div>
         <van-collapse-item title="其他绑定方式" name="2">
           <div class="coll-form">
-            <nxInput v-model="formData.name" label="车架号*" placeholder="请选输入车架号" input-align="right" />
-            <nxInput v-model="formData.vin" label="发动机号*" placeholder="请选输入发动机号" input-align="right" />
+            <nxInput v-model="formData.vin" label="车架号*" placeholder="请选输入车架号" input-align="right" />
+            <nxInput v-model="formData.engineNumber" label="发动机号*" placeholder="请选输入发动机号" input-align="right" />
           </div>
         </van-collapse-item>
       </van-collapse>

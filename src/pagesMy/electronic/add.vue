@@ -84,6 +84,8 @@ function changeSize(add: boolean) {
 function tipBtn() {
   state.polygons = [];
   state.circle = [];
+  console.log(state.markers);
+
   state.markers.forEach((element: any) => {
     //绘制圆
     if (element.fenceType === 'ROUND') {
@@ -99,20 +101,20 @@ function tipBtn() {
       //绘制矩形
       let points = [];
       points.push({
-        ['longitude']: Number(element.longitude + (element.length || markLength.value) / 100 / 1000),
-        ['latitude']: Number(element.latitude - (element.length || markLength.value) / 111 / 1000)
+        ['longitude']: Number(+element.longitude + (element.length || markLength.value) / 100 / 1000),
+        ['latitude']: Number(+element.latitude - (element.length || markLength.value) / 111 / 1000)
       });
       points.push({
-        ['longitude']: Number(element.longitude + (element.length || markLength.value) / 100 / 1000),
-        ['latitude']: Number(element.latitude + (element.length || markLength.value) / 111 / 1000)
+        ['longitude']: Number(+element.longitude + (element.length || markLength.value) / 100 / 1000),
+        ['latitude']: Number(+element.latitude + (element.length || markLength.value) / 111 / 1000)
       });
       points.push({
-        ['longitude']: Number(element.longitude - (element.length || markLength.value) / 100 / 1000),
-        ['latitude']: Number(element.latitude + (element.length || markLength.value) / 111 / 1000)
+        ['longitude']: Number(+element.longitude - (element.length || markLength.value) / 100 / 1000),
+        ['latitude']: Number(+element.latitude + (element.length || markLength.value) / 111 / 1000)
       });
       points.push({
-        ['longitude']: Number(element.longitude - (element.length || markLength.value) / 100 / 1000),
-        ['latitude']: Number(element.latitude - (element.length || markLength.value) / 111 / 1000)
+        ['longitude']: Number(+element.longitude - (element.length || markLength.value) / 100 / 1000),
+        ['latitude']: Number(+element.latitude - (element.length || markLength.value) / 111 / 1000)
       });
       element.path = points;
       state.polygons.push({
@@ -265,7 +267,7 @@ watch(searchInput, (n) => {
           :key="item.name"
           @click="bindSearch(item)"
         >
-          <div v-show="item.location" class="flex justify-between items-center p-32rpx">
+          <div v-show="item.location?.length" class="flex justify-between items-center p-32rpx">
             <nx-image
               src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/local.png"
               width="32rpx"

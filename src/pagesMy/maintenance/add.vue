@@ -9,7 +9,7 @@ import NxCheckBox from '@/components/nxCheckbox/index.vue';
 import nxImage from '@/components/nxImage/nxImage.vue';
 
 import { addMaintenance } from '@/api/my/maintenance';
-import { getCarList } from '@/api/my/carConfig';
+import { getCarList } from '@/api/my/carManagement';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
 import { useStore } from '../../store/modules/store';

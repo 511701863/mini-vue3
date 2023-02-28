@@ -17,10 +17,13 @@ const obj:any = {
   },
   401: function(msg:string) {
     uni.showToast({
-      title: '请登录',
-      icon: 'none',
+      title: '登录过期',
+      icon: 'error',
       duration: 2000
     });
+    setTimeout(() => {
+      uni.navigateTo({url:'/pages/common/login/index'});
+    }, 1000);
   }
 };
 

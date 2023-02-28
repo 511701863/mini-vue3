@@ -6,49 +6,46 @@ import { useConfig } from '@/store/modules/config';
 
 // QDinit();
 // login();
-uni.getLocation({
-  type: 'gcj02',
-  success: (res) => {
-    uni.setStorageSync('longitude', res.longitude);
-    uni.setStorageSync('latitude', res.latitude);
-    qqmapsdk.reverseGeocoder({
-      location: {
-        latitude: res.latitude,
-        longitude: res.longitude
-      },
-      success: function (res: any) {
-        console.log(res);
 
-        uni.setStorageSync('city', res.result.ad_info.city);
-        uni.setStorageSync('addName', res.result.formatted_addresses.recommend);
-        uni.setStorageSync('provinceCode', res.result.ad_info.adcode.slice(0, 3)+'000');
-        uni.setStorageSync('province', res.result.ad_info.province);
-        uni.setStorageSync('findCity', res.result.ad_info.city);
-        uni.setStorageSync('address', res.result.address);
-      },
-      fail: function (error: any) {
-        console.error(error);
-      }
-    });
-  },
-  fail() {
-    uni.showToast({
-      title: '位置获取失败',
-      icon: 'error',
-      duration: 2000
-    });
-  }
-});
 onLaunch(() => {
   console.log('App onLaunch');
 });
 onShow(() => {
+  uni.getLocation({
+    type: 'gcj02',
+    success: (res) => {
+      uni.setStorageSync('longitude', res.longitude);
+      uni.setStorageSync('latitude', res.latitude);
+      qqmapsdk.reverseGeocoder({
+        location: {
+          latitude: res.latitude,
+          longitude: res.longitude
+        },
+        success: function (res: any) {
+          uni.setStorageSync('city', res.result.ad_info.city);
+          uni.setStorageSync('addName', res.result.formatted_addresses.recommend);
+          uni.setStorageSync('provinceCode', res.result.ad_info.adcode.slice(0, 3) + '000');
+          uni.setStorageSync('province', res.result.ad_info.province);
+          uni.setStorageSync('findCity', res.result.ad_info.city);
+          uni.setStorageSync('address', res.result.address);
+        },
+        fail: function (error: any) {
+          console.error(error);
+        }
+      });
+    },
+    fail() {
+      uni.showToast({
+        title: '位置获取失败',
+        icon: 'error',
+        duration: 2000
+      });
+    }
+  });
   console.log('App Show');
 });
 onHide(() => {
   console.log('App Hide');
 });
 </script>
-<style>
-
-</style>
+<style></style>

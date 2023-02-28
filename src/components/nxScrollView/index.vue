@@ -10,16 +10,23 @@ type Props = {
   //是否开启底部刷新
   isLowerBottom: boolean,
   cbFn: (...args: any[]) => Promise<any>,
-  manual:boolean,
-  headerHeight?: number
+  manual: boolean,
+  headerHeight?: number,
+  //是否为消息中心
+  msgData?:boolean
 }
 const props = withDefaults(defineProps<Props>(), {
   refreshTop: 70,
   headerHeight: 0,
   isLowerBottom: true,
-  manual:false,
-  params: {}
+  manual: false,
+  params: {},
+  msgData:false
 });
+interface EmiteProps {
+  (event: 'onSuccess', value:any): void,
+}
+const emits = defineEmits<EmiteProps>();
 const page = reactive({
   pageSize: 5,
   pageIndex: 1,
@@ -58,24 +65,31 @@ const { run, data } = useRequest(props.cbFn, {
   // refreshDeps:[() => page.pageIndex],
   // refreshDepsParams:computed(() => [Object.assign({ pageSize: page.pageSize, pageIndex: page.pageIndex }, props.params)]),
   onSuccess: (res) => {
-    page.total = data.value?.page?.totalCount ?? 0;
-    page.pageSize = data.value?.page?.pageSize ?? 5;
-    page.pageIndex = data.value?.page?.pageIndex + 1 ?? 1;
-    if (page.pageIndex > 1) {
-      list.value = [...list.value, ...(data.value?.dataList ?? [])];
-    } else {
-      list.value = data.value?.dataList;
+    if (Array.isArray(data.value) || Array.isArray(data.value?.dataList)) {
+      page.total = data.value?.page?.totalCount ?? 0;
+      page.pageSize = data.value?.page?.pageSize ?? 5;
+      page.pageIndex = data.value?.page?.pageIndex ?? 1;
+      if(props.msgData){
+        page.pageIndex +=1;
+      }
+      if (page.pageIndex > 1) {
+        list.value = [...list.value, ...((Array.isArray(data.value) ? data.value : data.value?.dataList) ?? [])];
+      } else {
+        list.value = Array.isArray(data.value) ? data.value : data.value?.dataList;
+      }
+      if (page.pageSize * page.pageIndex >= page.total) {
+        bottomText.value = '已经到底了';
+      } else {
+        bottomText.value = '下拉加载更多';
+      }
+      if (data.value?.page?.pageSize * 1 < page.total) {
+        showBottom.value = true;
+      }
+    }else{
+      list.value = data.value;
     }
-    if (page.pageSize * page.pageIndex >= page.total) {
-      bottomText.value = '已经到底了';
-    } else {
-      bottomText.value = '下拉加载更多';
-    }
-    console.log(data.value?.page?.pageSize);
 
-    if (data.value?.page?.pageSize * 1 < page.total) {
-      showBottom.value = true;
-    }
+    emits('onSuccess', list.value);
   },
   onFinally: () => {
     if (_freshing.value) {
@@ -84,10 +98,9 @@ const { run, data } = useRequest(props.cbFn, {
     }
   }
 });
-function search(){
-  const params = {...props.params};
+function search() {
+  const params = { ...props.params };
   delete params.pageIndex;
-
   run(Object.assign({ pageSize: page.pageSize, pageIndex: page.pageIndex }, params));
 }
 onLoad(() => {
@@ -100,7 +113,7 @@ onLoad(() => {
       console.log(windowHeight, (props.headerHeight * screenWidth / 750));
     }
   });
-  if(!props.manual){
+  if (!props.manual) {
     search();
   }
 });
@@ -135,7 +148,7 @@ function lowerBottom() {
   if (page.pageSize * page.pageIndex >= page.total) { return; }
   bottomText.value = '加载中';
   console.log(page.pageIndex);
-  page.pageIndex = page.pageIndex +1;
+  page.pageIndex = page.pageIndex + 1;
   search();
 }
 function upperTop() {
@@ -144,7 +157,7 @@ function upperTop() {
 const hasData = computed(() => {
   return (Array.isArray(list.value) && list.value.length > 0) || (!Array.isArray(list.value) && list.value);
 });
-defineExpose({search});
+defineExpose({ search });
 </script>
 <template>
   <scroll-view

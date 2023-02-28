@@ -5,9 +5,10 @@ import { onLoad } from '@dcloudio/uni-app';
 import { useUser } from '@/store/modules/user';
 import { useRouter } from '@/router/router';
 import { getPrivacyAgreement } from '@/api/common/agreement';
+import { userLogin, userInfo } from '@/api/car';
 
 const router = useRouter();
-const { login } = useUser();
+const { login, userState } = useUser();
 
 // 是否扫码进入
 const shareUserId = ref('');
@@ -18,17 +19,18 @@ console.log('backQuery', backQuery);
 
 async function bindGetUserInfo(e: any) {
   uni.showLoading({
-    title:'请稍等'
+    title: '请稍等'
   });
-  const {code} = await login();
-  if(code === 201){
-    uni.hideLoading();
-    router.navigateTo({
-      name: 'register'
-    });
-  }else{
-    router.navigateBack({});
-  }
+  const params = await login();
+  const res = await userLogin(params);
+  uni.setStorageSync('isLogin', true);
+  uni.hideLoading();
+  const userRes = await userInfo();
+  userState.userInfo = userRes.data;
+  console.log(userState.userInfo);
+  uni.setStorageSync('userInfo', userRes.data);
+  router.navigateBack({});
+
   // let param=e.detail;
   // if(shareUserId.value){
   //   param.shareUserId=shareUserId.value;

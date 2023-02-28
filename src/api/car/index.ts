@@ -34,3 +34,28 @@ export function pushMsg<P=any, T=any>(...arg:any[]):Promise<any> {
     }, 1000);
   });
 }
+
+export function userLogin<P=any, T=any>(data:P) {
+  return post<T>({
+    url: '/v1/account/wx_applet/login?device=wx-applet',
+    data,
+    loading: false,
+    loadingMask:true,
+    header:{
+      deviceSN:'wx-applet',
+      CompanyID:1
+    }
+  });
+}
+
+export function userInfo<P=any, T=any>() {
+  return post<T>({
+    url: '/bss/inside/user/get',
+    loading: false,
+    loadingMask:true,
+    header:{
+      deviceSN:'wx-applet',
+      CompanyID:1
+    }
+  });
+}

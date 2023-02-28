@@ -1,24 +1,12 @@
 <script setup lang="ts">
 import { useRouter } from '@/router/router';
 import { onMounted, ref, reactive, watchEffect, watch, isRef, computed } from 'vue';
-import { CarInfo, controlItem } from '../type';
-import { useRequest } from '@/hooks/useRequest/useRequst';
-import { getList, getList2 } from '@/api/car/index';
-import { debounce } from '@/utils/tool/index';
 
 const router = useRouter();
 type TopLeftProps = {
-  carInfo?:CarInfo
+  carInfo?:Control.VehiclLoveAo
 }
 const props = defineProps<TopLeftProps>();
-const state = reactive({
-  carInfo: {
-    value: '1234',
-    label: '川A123456',
-    mile: '456',
-    electricity: '70'
-  } as CarInfo
-});
 </script>
 
 <template>
@@ -31,11 +19,11 @@ const state = reactive({
         </div>
         <div class="flex value-box">
           <div class="mile-value">
-            <span>{{ props.carInfo?.mile || 20 }}</span>
+            <span>{{ props.carInfo?.vehicleCondition?.lfTemperature || '--' }}</span>
             <span class="mile-icon text-medium">
               ℃ /
             </span>
-            <span>{{ props.carInfo?.mile || 2.1 }}</span>
+            <span>{{ props.carInfo?.vehicleCondition?.lfPsi || '--' }}</span>
             <span class="mile-icon text-medium">
               Bar
             </span>
@@ -48,11 +36,11 @@ const state = reactive({
         </div>
         <div class="flex value-box">
           <div class="mile-value">
-            <span>{{ props.carInfo?.mile || 20 }}</span>
+            <span>{{ props.carInfo?.vehicleCondition?.lrTemperature || '--' }}</span>
             <span class="mile-icon text-medium">
               ℃ /
             </span>
-            <span>{{ props.carInfo?.mile || 2.1 }}</span>
+            <span>{{ props.carInfo?.vehicleCondition?.lrPsi || '--' }}</span>
             <span class="mile-icon text-medium">
               Bar
             </span>
@@ -67,11 +55,11 @@ const state = reactive({
         </div>
         <div class="flex value-box">
           <div class="mile-value">
-            <span>{{ props.carInfo?.mile || 20 }}</span>
+            <span>{{ props.carInfo?.vehicleCondition?.rfTemperature || '--' }}</span>
             <span class="mile-icon text-medium">
               ℃ /
             </span>
-            <span>{{ props.carInfo?.mile || 2.1 }}</span>
+            <span>{{ props.carInfo?.vehicleCondition?.rfPsi || '--' }}</span>
             <span class="mile-icon text-medium">
               Bar
             </span>
@@ -84,11 +72,11 @@ const state = reactive({
         </div>
         <div class="flex value-box">
           <div class="mile-value">
-            <span>{{ props.carInfo?.mile || 20 }}</span>
+            <span>{{ props.carInfo?.vehicleCondition?.rrTemperature || '--' }}</span>
             <span class="mile-icon text-medium">
               ℃ /
             </span>
-            <span>{{ props.carInfo?.mile || 2.1 }}</span>
+            <span>{{ props.carInfo?.vehicleCondition?.rrPsi || '--' }}</span>
             <span class="mile-icon text-medium">
               Bar
             </span>

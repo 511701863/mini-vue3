@@ -43,7 +43,7 @@ function deleteFn(id:any){
 
 <template>
   <div class="relative">
-    <nxScrollView ref="scrollRef" :cb-fn="listAppMessage" :params="{msgModel:modelCode}" :manual="true">
+    <nxScrollView ref="scrollRef" :msg-data="true" :cb-fn="listAppMessage" :params="{msgModel:modelCode}" :manual="true">
       <template #list="{ list }">
         <div v-for="(item,index) in list as Message.MessageInfoAo[]" :key="index">
           <van-swipe-cell :right-width="64">

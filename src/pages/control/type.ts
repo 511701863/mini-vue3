@@ -8,9 +8,11 @@ export type CarInfo={
 
 export type controlItem = {
   name:string;
-  checkSrc:string;
+  checkSrc?:string;
   src:string;
   routerName?:RoutesNamesType;
-  check:boolean;
+  check?:boolean;
   id?:number | string
+  value?:string
+  checkCode?:string
 }

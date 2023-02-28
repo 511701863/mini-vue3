@@ -2,13 +2,13 @@
 import { ref, reactive, Ref, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 
-import { pushMsg, getList } from '@/api/car/index';
+import { bindVehicle } from '@/api/my/carManagement';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
 import nxImage from '@/components/nxImage/nxImage.vue';
 
 const router = useRouter();
-const carInfo = ref({
+const carInfo:any = ref({
   warning: false
 });
 const checkout = ref(false);
@@ -25,22 +25,32 @@ function UserPrivacy() {
 }
 function bindCar() {
   uni.showModal({
-    title: '撤销授权',
-    content: `您正在解绑车牌号为${'川A·88888'}的车辆，请确认是否继续?`,
+    title: '绑定车辆',
+    content: '您正绑定车辆，请确认是否继续?',
     confirmColor: '#FF933B',
     success: function (res) {
       if (res.confirm) {
-        console.log('用户点击qr');
+        run({vin:carInfo.value?.vin});
       } else if (res.cancel) {
         console.log('用户点击取消');
       }
     }
   });
 }
-const { run, data } = useRequest(getList, {
+onLoad((query) => {
+ const {info} = query;
+ console.log(info);
+
+  carInfo.value = JSON.parse(info || '');
+});
+const { run} = useRequest(bindVehicle, {
   manual: true,
   onSuccess: () => {
-    carInfo.value.warning = !carInfo.value.warning;
+    uni.showToast({
+      title:'操作成功',
+      icon:'none'
+    });
+    router.navigateBack({delta:2});
   }
 });
 </script>
@@ -50,17 +60,17 @@ const { run, data } = useRequest(getList, {
     <div class="mt-160rpx relative w-686rpx bg-white mb-32rpx rounded-16rpx p-32rpx box-border">
       <div class="flex flex-wrap justify-center items-center mt-132rpx">
         <div class="font-bold">
-          COWIN FX12旗舰版
+          {{ carInfo?.modelShowName }}
         </div>
         <div class="mt-14rpx text-24rpx text-grayText w-622rpx text-center">
-          VIN：COWINKEY00000000
+          VIN：{{ carInfo?.vin }}
         </div>
         <div class="w-622rpx flex justify-between p-y-32rpx mt-80rpx">
           <div>
             4S店
           </div>
           <div>
-            成都国贸经销商
+            {{ carInfo?.salesAreaName }}
           </div>
         </div>
         <div class="w-622rpx flex justify-between p-y-32rpx">
@@ -68,7 +78,7 @@ const { run, data } = useRequest(getList, {
             发动机号
           </div>
           <div>
-            FDJ80991
+            {{ carInfo?.engineNumber }}
           </div>
         </div>
         <div class="w-622rpx flex justify-between p-y-32rpx">
@@ -76,14 +86,14 @@ const { run, data } = useRequest(getList, {
             车牌号
           </div>
           <div>
-            川A·VV666
+            {{ carInfo?.carLicense }}
           </div>
         </div>
       </div>
       <div class="absolute top--132rpx right-45rpx">
         <image
           class="w-600rpx h-258rpx"
-          src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_car.png"
+          :src="carInfo?.modelImage"
         />
       </div>
     </div>

@@ -25,9 +25,12 @@ function createRequest(method: MethodType) {
           });
         }
       }
-      const header = {
+      const header:any = {
         'Cookie': uni.getStorageSync('COOKIE')
       };
+      if(options.checkPin){
+        header.pin = config.pin;
+      }
       uni.request({
         url: config.baseURL + options.url,
         data: options.data,
@@ -39,7 +42,12 @@ function createRequest(method: MethodType) {
 
           //成功响应拦截
           if (res.header['Set-Cookie'] || res.header['set-cookie']) {
-            // uni.setStorageSync('COOKIE', res.header['Set-Cookie'] || res.header['set-cookie']);
+            let params:any = res.header['Set-Cookie'] || res.header['set-cookie'];
+            params = params.replaceAll('Path=/', '');
+            params = params.replaceAll('HttpOnly', '');
+            params = params.replaceAll(',', ';');
+            params = params.split(';').filter((item:any) => item!== ' ').join(';');
+            uni.setStorageSync('COOKIE', params);
           }
           if ([0, 200].includes(data.code)) {
             resolve(data);

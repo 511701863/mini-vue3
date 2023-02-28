@@ -88,7 +88,7 @@ const cellContent = computed(() => {
     }
   }else{
     activeItem = {
-      name:dayjs(props.modelValue).format(props.type==='datetime'?'YYYY-MM-DD HH:mm':'YYYY-MM-DD')
+      name:props.modelValue ? dayjs(props.modelValue).format(props.type==='datetime'?'YYYY-MM-DD HH:mm':'YYYY-MM-DD'):''
     };
   }
   return activeItem.name ? activeItem.name : props.placeholder;
