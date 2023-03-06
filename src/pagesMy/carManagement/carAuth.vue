@@ -14,12 +14,12 @@ import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
 import dayjs from 'dayjs';
 
-const { run: grantCarFn, data: carList } = useRequest<any, GrantCarType[]>(grantCar, {
+const { run: grantCarFn, data: grantData } = useRequest<any, GrantCarType[]>(grantCar, {
   manual: true,
-  onSuccess: () => {
+  onSuccess: (res) => {
     uni.showToast({
-      title:'授权成功',
-      icon:'none'
+      title: '授权成功',
+      icon: 'none'
     });
     router.navigateBack({});
   }
@@ -71,9 +71,9 @@ watch(() => formData.grantEndTime, (nVal) => {
     formData.grantEndTime = '';
   }
 });
-function grant(){
+function grant() {
   console.log(formData);
-  const params = {...formData};
+  const params = { ...formData };
   delete params.type;
   grantCarFn(params);
 }
@@ -83,7 +83,7 @@ function grant(){
   <div class="relative p-32rpx h-100vh box-border auth-page">
     <div class="p-32rpx flex items-grantStartTime bg-pageBg h-200rpx box-border">
       <div>
-        <image class="w-320rpx h-128rpx" :src="params.imgUrl" />
+        <image class="w-320rpx h-148rpx" :src="params.imgUrl" />
       </div>
       <div class="text-grayText ml-12rpx">
         <div class="text-titleMedium font-bold lh-46rpx">
@@ -116,13 +116,19 @@ function grant(){
       有效期：
     </p>
     <div class="m-t-16rpx">
-      <nxDatePicker v-model="formData.grantStartTime" :min-date="new Date().getTime()" input-align="left" type="datetime" placeholder="请选择有效开始时间" />
+      <nxDatePicker
+        v-model="formData.grantStartTime"
+        :min-date="new Date().getTime()"
+        input-align="left"
+        type="datetime"
+        placeholder="请选择有效开始时间"
+      />
     </div>
     <div class="m-t-16rpx">
       <nxDatePicker
         ref="DatePickerEnd"
         v-model="formData.grantEndTime"
-        :min-date="new Date().getTime()+1000*60*5"
+        :min-date="new Date().getTime() + 1000 * 60 * 5"
         input-align="left"
         type="datetime"
         placeholder="请选择有效结束时间"

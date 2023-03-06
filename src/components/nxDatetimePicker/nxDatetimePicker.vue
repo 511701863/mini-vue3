@@ -24,7 +24,8 @@ interface Props {
   nextDay?: boolean,
   border?: boolean,
   inputAlign?:'left' | 'right' | 'center',
-  placeholder?: string
+  placeholder?: string,
+  rangOptions?:Array<string> | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -58,9 +59,9 @@ const columns = ref([
     defaultIndex: 0
   }
 ]);
-const columnsRange = ref([
+const columnsRange:any = ref([
   {
-    values: ['7:00-8:00', '8:00-9:00', '9:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00', '13:00-14:00', '14:00-15:00', '15:00-16:00', '16:00-17:00', '17:00-18:00', '18:00-19:00', '19:00-20:00', '20:00-21:00', '21:00-22:00', '22:00-23:00', '23:00-24:00'],
+    values:[],
     defaultIndex: 0
   }
 ]);
@@ -75,8 +76,11 @@ const cellContent = computed(() => {
   let options:any = [];
   let activeItem:any = null;
   if(['timeRange'].includes(props.type)){
-    options = columnsRange.value;
-    activeItem = options.find((item:any) => item === props.modelValue);
+    options = columnsRange.value[0].values;
+    activeItem = {
+      name:options.find((item:any) => item === props.modelValue)
+    };
+
   }else if(['secondsTime'].includes(props.type)){
     activeItem = {
       name:props.modelValue
@@ -91,7 +95,12 @@ const cellContent = computed(() => {
       name:props.modelValue ? dayjs(props.modelValue).format(props.type==='datetime'?'YYYY-MM-DD HH:mm':'YYYY-MM-DD'):''
     };
   }
-  return activeItem.name ? activeItem.name : props.placeholder;
+  return activeItem?.name ? activeItem.name : props.placeholder;
+});
+watch(() => props.rangOptions, (nVal) => {
+  console.log(nVal, 1234);
+  columnsRange.value[0].values = props.rangOptions ?? [];
+  console.log(columnsRange.value);
 });
 </script>
 <template>
@@ -107,9 +116,18 @@ const cellContent = computed(() => {
   />
   <van-popup :show="show" position="bottom" custom-style="height: 40%" @close="show = false">
     <van-picker
-      v-if="['secondsTime', 'timeRange'].includes(props.type)"
+      v-if="['secondsTime'].includes(props.type)"
       show-toolbar
-      :columns="props.type === 'secondsTime' ? columns : columnsRange"
+      :columns="columns"
+      :title="props.label"
+      visible-item-count="5"
+      @cancel="show = false"
+      @confirm="(e: any) => input(e, true)"
+    />
+    <van-picker
+      v-else-if="['timeRange'].includes(props.type) && props.rangOptions"
+      show-toolbar
+      :columns="columnsRange"
       :title="props.label"
       visible-item-count="5"
       @cancel="show = false"

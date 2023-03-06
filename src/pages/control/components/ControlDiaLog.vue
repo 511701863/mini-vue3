@@ -126,6 +126,10 @@ const { run: controlWindowFn } = useCheckRes(controlWindow, successControl);
 const { run: controlSunroofFn } = useCheckRes(controlSunroof, successControl);
 
 function clickControl(item: controlItem) {
+  //车窗天窗打开的就不继续
+  if([4, 5, 7, 8].includes(item.id?+item.id : 4) && item.check){
+    return;
+  }
   switch (item.id) {
     case 1:
       controlFindCarFn({ vin: props.carInfo.vin });
@@ -145,13 +149,13 @@ function clickControl(item: controlItem) {
       controlWindowFn({ vin: props.carInfo.vin, destStatus: 'OFF', destWindow: 'ALL' });
       break;
     case 7:
-      controlSunroofFn({ vin: props.carInfo.vin, destStatus: 'ON', destPosition: '_comfortable2full' });
+      controlSunroofFn({ vin: props.carInfo.vin, destStatus: 'ON', destPosition: '_up' });
       break;
     case 8:
-      controlSunroofFn({ vin: props.carInfo.vin, destStatus: 'OTHER', destPosition: '_comfortable2full' });
+      controlSunroofFn({ vin: props.carInfo.vin, destStatus: 'OTHER', destPosition: '_30' });
       break;
     case 9:
-      controlSunroofFn({ vin: props.carInfo.vin, destStatus: 'OFF', destPosition: '_comfortable2full' });
+      controlSunroofFn({ vin: props.carInfo.vin, destStatus: 'OFF', destPosition: '_closed' });
       break;
     default:
       console.log('无');

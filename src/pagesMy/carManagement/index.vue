@@ -103,7 +103,7 @@ const agree = () => {
               <div class="p-32rpx">
                 <div v-for="(item, index) in list as VehicleExteriorAo[]" :key="index">
                   <div
-                    class="mt-180rpx relative w-686rpx bg-white mb-32rpx rounded-16rpx p-32rpx box-border"
+                    class="mt-165rpx relative w-686rpx bg-white mb-32rpx rounded-16rpx p-32rpx box-border"
                     @click="clickBtn(tabIndex === 0 ? 'carManagementDetail' : 'carManagementAuthDetail', item,false)"
                   >
                     <div v-if="tabIndex === 0" class="flex flex-wrap justify-center items-center">
@@ -196,17 +196,17 @@ const agree = () => {
                         </div>
                       </div>
                       <div class="w-622rpx flex justify-between p-y-32rpx">
-                        <div class="font-bold">
+                        <div class="font-bold  w-55px">
                           有效期
                         </div>
                         <div>
-                          {{ dayjs(item.grantStartTime).format('MM月DD日 HH:mm') }} {{
+                          {{ dayjs(item.grantStartTime).format('MM月DD日 HH:mm') }}至{{
                             dayjs(item.grantEndTime).format('MM月DD日 HH:mm') }}
                         </div>
                       </div>
                     </div>
-                    <div class="absolute top--132rpx right-45rpx">
-                      <image class="w-600rpx h-258rpx" :src="item.modelImage" />
+                    <div class="absolute top--132rpx right-95rpx">
+                      <image class="w-480rpx h-245rpx" :src="item.modelImage" />
                     </div>
                   </div>
                 </div>

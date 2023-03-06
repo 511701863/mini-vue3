@@ -2,25 +2,17 @@
 import { onMounted, ref, reactive, watchEffect, watch, isRef, computed } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 
-import { useRequest } from '@/hooks/useRequest/useRequst';
 import { useRouter } from '@/router/router';
-import { getList, getList2 } from '@/api/car/index';
-import { debounce } from '@/utils/tool/index';
-import { useConfig } from '@/store/modules/config';
 
 const router = useRouter();
-// const props = defineProps<any>();
-const {setPin, config} = useConfig();
 const isLogin = ref(false);
 onShow(() => {
   isLogin.value = uni.getStorageSync('isLogin');
 });
-function addCar() {
-  if (!isLogin.value) {
-    router.navigateTo({
+function goLogin() {
+  router.navigateTo({
       name: 'login'
     });
-  }
 }
 </script>
 
@@ -31,13 +23,13 @@ function addCar() {
       src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/no_car.png"
     />
     <p class="text-gray text-titleMedium">
-      暂无车辆，请前往添加
+      暂未登录，请登录
     </p>
     <button
       class="mt-72rpx rounded-50rpx w-320rpx h-100rpx bg-buttonColor text-white text-32rpx lh-100rpx"
-      @click="addCar"
+      @click="goLogin"
     >
-      添加车辆
+      去登陆
     </button>
   </view>
 </template>

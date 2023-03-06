@@ -2,6 +2,127 @@ declare namespace MyCenter {
   /**
   * 维保
   */
+ //维保详情
+ export interface MaintenanceAppointmentDetailAo {
+  /**
+   * 预约单号
+   */
+  appointNo?: string;
+  /**
+   * 取消原因
+   */
+  cancelReason?: string;
+  /**
+   * 客户电话
+   */
+  cellPhoneNumber?: string;
+  /**
+   * 确认时间
+   */
+  confirmDate?: number;
+  /**
+   * 创建时间
+   */
+  createTime?: number;
+  /**
+   * 客户姓名
+   */
+  customerName?: string;
+  /**
+   * 4S店编号
+   */
+  dealerCode?: string;
+  /**
+   * 4s店地址
+   */
+  detailAddress?: string;
+  /**
+   * 评价，6-100字
+   */
+  evaluate?: string;
+  /**
+   * 保养完成时间
+   */
+  examineTime?: number;
+  /**
+   * 主键ID
+   */
+  id?: number;
+  /**
+   * 维保项目
+   */
+  items?: string;
+  /**
+   * 车牌号
+   */
+  licensePlate?: string;
+  /**
+   * 维保材料
+   */
+  materials?: string;
+  /**
+   * 保养公里数，单位：km
+   */
+  mileage?: string;
+  /**
+   * 车系
+   */
+  motorSeries?: string;
+  /**
+   * 车型
+   */
+  motorType?: string;
+  /**
+   * 预约渠道，2：TSP
+   */
+  orderChannel?: number;
+  /**
+   * 预约日期
+   */
+  planArriveDate?: number;
+  /**
+   * 预约时间段，N:00-(N+1):00
+   */
+  planArriveTime?: string;
+  /**
+   * 预约说明
+   */
+  remark?: string;
+  /**
+   * 服务类型，1：保养，2：维修
+   */
+  repairType?: string;
+  /**
+   * 4s店名称
+   */
+  salesAreaName?: string;
+  /**
+   * 评分，0.5-5
+   */
+  score?: string;
+  /**
+   * 服务顾问姓名
+   */
+  serviceAdvisorName?: string;
+  /**
+   * 服务热线
+   */
+  servicePhone?: string;
+  /**
+   * 状态，1：接单中；2：成功接单(待维保)；3：取消预约；4：订单完成；-1：无效订单；5：订单过期
+   */
+  status?: number;
+  /**
+   * 更新时间
+   */
+  updateTime?: number;
+  /**
+   * 车架号
+   */
+  vin?: string;
+  latitude:string;
+  longitude:string;
+}
   export interface VehicleMaintenanceAppointmentAppPageAo {
     /**
      * 预约单号
@@ -201,6 +322,7 @@ declare namespace MyCenter {
      * 状态  0：有效，-1：无效
      */
     status?: number;
+    distance?:number;
   }
   export interface AreaVo {
     areaId?: number;

@@ -11,7 +11,7 @@ const props = defineProps<TopLeftProps>();
 
 <template>
   <view>
-    <image src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/swiper_2.png" />
+    <image src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/swiper_2.png" class="relative bottom-60rpx" />
     <div class="car-info container left-8rpx">
       <div class="mile-info mt-76rpx">
         <div class="text-medium">
@@ -30,7 +30,7 @@ const props = defineProps<TopLeftProps>();
           </div>
         </div>
       </div>
-      <div class="mile-info mt-140rpx">
+      <div class="mile-info mt-130rpx">
         <div class="text-medium">
           左后轮胎温/胎压
         </div>
@@ -66,7 +66,7 @@ const props = defineProps<TopLeftProps>();
           </div>
         </div>
       </div>
-      <div class="mile-info mt-140rpx">
+      <div class="mile-info mt-130rpx">
         <div class="text-medium">
           右后轮胎温/胎压
         </div>

@@ -21,17 +21,17 @@ const props = defineProps<TopLeftProps>();
     <nx-image
       src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_bg.png"
       width="770rpx"
-      height="794rpx"
+      height="724rpx"
     />
     <div class="car-img">
       <image :src="props.carInfo?.modelImage" />
     </div>
     <div class="car-info container">
-      <div class="flex">
-        <div class="address">
+      <div class="flex" @click="router.navigateTo({name:'locationService',query:{vin:props.carInfo?.vin}})">
+        <div class="address truncate">
           {{ props.carInfo?.vehicleCondition?.reportAddress || '--' }}
         </div>
-        <u-icon name="arrow-right" color="#262626" size="20" />
+        <van-icon name="arrow" size="25rpx" color="#262626" />
       </div>
       <div class="time">
         {{ props.carInfo?.vehicleCondition?.reportTime ?
@@ -76,16 +76,17 @@ const props = defineProps<TopLeftProps>();
 
 .car-img {
   position: absolute;
-  right: 0;
-  top: 350rpx;
+  left: 90rpx;
+  top: 340rpx;
 
   image {
-    width: 638rpx;
-    height: 288rpx;
+    width: 610rpx;
+    height: 295rpx;
   }
 }
 
 .address {
+  max-width: 650rpx;
   margin-right: 26rpx;
 }
 
@@ -98,7 +99,7 @@ const props = defineProps<TopLeftProps>();
 
 .mile-info {
   margin-left: 40rpx;
-  margin-top: 28rpx;
+  margin-top: 48rpx;
   font-size: 24rpx;
 
   .value-box {
@@ -109,7 +110,7 @@ const props = defineProps<TopLeftProps>();
 
     .mile-value {
       margin-top: 6rpx;
-      font-size: 72rpx;
+      font-size: 62rpx;
       font-weight: bold;
     }
 

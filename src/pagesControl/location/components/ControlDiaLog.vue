@@ -2,12 +2,13 @@
 import { useRouter } from '@/router/router';
 import { onMounted, ref, reactive, watchEffect, watch, isRef, computed } from 'vue';
 import { useRequest } from '@/hooks/useRequest/useRequst';
-import { getList, getList2, pushMsg } from '@/api/car/index';
-import { debounce } from '@/utils/tool/index';
+import { controlSunroof, controlWindow, controlAlarm, controlLight, controlFindCar } from '@/api/control/index';
+import { useCheckRes } from '@/hooks/useRequest/useCheckRes';
 import { controlItem } from '@/pages/control/type';
 
 type ControlDialogProps = {
   modelValue: boolean,
+  carInfo: Partial<Control.VehiclLoveAo>,
   btnId: number | string
 }
 
@@ -16,11 +17,12 @@ const props = withDefaults(defineProps<ControlDialogProps>(), {
   modelValue: false,
   btnId: 2
 });
-const emit = defineEmits<{(evt: 'update:modelValue', value: boolean): void
+const emit = defineEmits<{(evt: 'update:modelValue', value: boolean): void,
+(e: 'controlSuccess'): void
 }>();
-const state = reactive<{clickItem:any, data:any}>({
+const state = reactive<{ clickItem: any, data: any }>({
   data: {},
-  clickItem:null
+  clickItem: null
 });
 const btnList = reactive<Record<string | number, controlItem[]>>({
   2: [{
@@ -44,70 +46,57 @@ const btnList = reactive<Record<string | number, controlItem[]>>({
     id: 3,
     name: '仅闪灯'
   }
-  ],
-  5: [{
-    src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_5_1.png',
-    checkSrc: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_5_1_s.png',
-    check: false,
-    id: 1,
-    name: '车窗全开'
-  },
-  {
-    src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_5_2.png',
-    checkSrc: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_5_2_s.png',
-    check: false,
-    id: 2,
-    name: '车窗半开'
-  },
-  {
-    src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_5_3.png',
-    checkSrc: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_5_3.png',
-    check: false,
-    id: 3,
-    name: '车窗全关'
-  }
-  ],
-  6: [{
-    src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_6_1.png',
-    checkSrc: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_6_1_s.png',
-    check: false,
-    id: 1,
-    name: '天窗全开'
-  },
-  {
-    src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_6_2.png',
-    checkSrc: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_6_2_s.png',
-    check: false,
-    id: 2,
-    name: '天窗翘起'
-  },
-  {
-    src: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_6_3.png',
-    checkSrc: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_6_3.png',
-    check: false,
-    id: 3,
-    name: '天窗全关'
-  }
   ]
 });
-function onSuccess(res:any) {
-  emit('update:modelValue', false);
-  if(state.clickItem.check !== undefined){
-    state.clickItem.check = !state.clickItem.check;
+watch(() => props.carInfo, (nVal) => {
+  if (nVal?.vin) {
+    //天窗
+    btnList[6].forEach((item) => { item.check = false; });
+    if (props.carInfo?.vehicleCondition?.srfOperateSts === 1) {
+      btnList[6][0].check = true;
+    } else if (props.carInfo?.vehicleCondition?.srfOperateSts === 2) {
+      btnList[6][1].check = true;
+
+    }
+    //车窗
+    btnList[5].forEach((item) => { item.check = false; });
+    if (props.carInfo?.vehicleCondition?.windowSts === 1) {
+      btnList[5][0].check = true;
+    } else if (props.carInfo?.vehicleCondition?.windowSts === 2) {
+      btnList[5][1].check = true;
+
+    }
   }
+}, { deep: true, immediate:true});
+
+function successControl() {
+  emit('controlSuccess');
 }
-const { run, data } = useRequest<any, any>(pushMsg, {
-  manual: true,
-  onSuccess
-});
+//寻车
+const { run: controlFindCarFn } = useCheckRes(controlFindCar, successControl);
+const { run: controlLightFn } = useCheckRes(controlLight, successControl);
+const { run: controlAlarmFn } = useCheckRes(controlAlarm, successControl);
+
 function clickControl(item: controlItem) {
-  state.clickItem = item;
-  run();
-  // if ([2, 5, 6].includes(Number(item.id) as number)) {
-  //   emit('update:dialog', !props.dialog);
-  // } else {
-  //   item.check = !item.check;
-  // }
+  //车窗天窗打开的就不继续
+  if([4, 5, 7, 8].includes(item.id?+item.id : 4) && item.check){
+    return;
+  }
+  switch (item.id) {
+    case 1:
+      controlFindCarFn({ vin: props.carInfo.vin });
+      break;
+    case 2:
+      controlLightFn({ vin: props.carInfo.vin, destStatus: 'ON' });
+      break;
+    case 3:
+      controlAlarmFn({ vin: props.carInfo.vin, destStatus: 'ON' });
+      break;
+    default:
+      console.log('无');
+  }
+  emit('update:modelValue', false);
+
 }
 </script>
 

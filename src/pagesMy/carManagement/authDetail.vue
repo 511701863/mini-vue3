@@ -48,7 +48,7 @@ const active = ref(0);
   <div class="relative bg-pageBg h-100vh">
     <div class="p-32rpx flex formData?s-start bg-pageBg h-200rpx box-border">
       <div>
-        <image class="w-320rpx h-128rpx" :src="formData?.modelImage" />
+        <image class="w-320rpx h-148rpx" :src="formData?.modelImage" />
       </div>
       <div class="text-grayText ml-12rpx">
         <div class="text-titleMedium font-bold lh-46rpx">

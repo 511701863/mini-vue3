@@ -140,7 +140,7 @@ declare namespace Control {
      * 车型简称
      */
     modelShowName?: string;
-    vehicleCondition?: VehicleCondition;
+    vehicleCondition: VehicleCondition;
     /**
      * VIN码
      */
@@ -154,7 +154,7 @@ declare namespace Control {
     /**
      * 电动空调温度档位
      */
-    acGear?: string;
+    acGear: string;
     /**
      * 极速降温-是否打开
      */

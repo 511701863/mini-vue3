@@ -42,13 +42,40 @@ export function useCheckRes<T, P extends any[] = any[]>(
       querise[defaultQuerise].status = checkData.value?.operationStatus as string;
       querise[defaultQuerise].data = checkData.value;
       //失败或者超时停止指令 清除定时器 或轮询超过20次
-      if (['FAILED', 'TIMEOUT'].includes(checkData.value?.operationStatus || '') || timerNum.value >= 20) {
+      if (['TIMEOUT'].includes(checkData.value?.operationStatus || '') || timerNum.value >= 40) {
         clearInterval(timer.value);
         timer.value = null;
+        checkSuccess(params);
         uni.hideLoading();
-        uni.showToast({
-          title: '指令超时',
-          icon: 'error'
+        uni.showModal({
+          title: '提示',
+          content: (checkData.value?.failureReason!=='0' && checkData.value?.failureReason) || '指令超时',
+          showCancel:false,
+          success: function (res) {
+            if (res.confirm) {
+              console.log('用户点击确定');
+            } else if (res.cancel) {
+              console.log('用户点击取消');
+            }
+          }
+        });
+      }
+      if(['FAILED'].includes(checkData.value?.operationStatus || '')){
+        clearInterval(timer.value);
+        timer.value = null;
+        checkSuccess(params);
+        uni.hideLoading();
+        uni.showModal({
+          title: '提示',
+          content: checkData.value?.failureReason || '指令失败',
+          showCancel:false,
+          success: function (res) {
+            if (res.confirm) {
+              console.log('用户点击确定');
+            } else if (res.cancel) {
+              console.log('用户点击取消');
+            }
+          }
         });
       }
       //执行成功后执行成功回调，清除定时器
@@ -78,7 +105,7 @@ export function useCheckRes<T, P extends any[] = any[]>(
   });
 
   //轮询检测 添加定时器
-  function polling(cbFn: (...args: any) => any, time = 1000) {
+  function polling(cbFn: (...args: any) => any, time = 2000) {
     timer.value = setInterval(cbFn, time);
   }
   return {

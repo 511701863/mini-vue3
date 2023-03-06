@@ -108,6 +108,7 @@ export function grantCar<T>(data:T) {
     url: '/dk/grant/grant',
     data,
     loading: true,
+    customErr:true,
     loadingMask: true,
     header: {
     }

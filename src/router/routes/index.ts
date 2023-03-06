@@ -70,6 +70,13 @@ export const subPackages = [
         'style': {
           'navigationBarTitleText': '位置服务'
         }
+      },
+      {
+        'path': 'aboutMe/index',
+        'name': 'aboutMe',
+        'style': {
+          'navigationBarTitleText': '关于我们'
+        }
       }
     ]
   },
@@ -263,6 +270,13 @@ export const subPackages = [
         'name': 'maintenanceAdd',
         'style': {
           'navigationBarTitleText': '维保预约'
+        }
+      },
+      {
+        'path': 'maintenance/evaluation',
+        'name': 'evaluation',
+        'style': {
+          'navigationBarTitleText': ''
         }
       }
     ]

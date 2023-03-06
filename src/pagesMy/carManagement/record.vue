@@ -36,7 +36,7 @@ onMounted(() => {
   <div class="relative">
     <div class="p-32rpx flex items-start bg-pageBg h-200rpx box-border">
       <div>
-        <image class="w-320rpx h-128rpx" :src="params.imgUrl" />
+        <image class="w-320rpx h-148rpx" :src="params.imgUrl" />
       </div>
       <div class="text-grayText ml-12rpx">
         <div class="text-titleMedium font-bold lh-46rpx">

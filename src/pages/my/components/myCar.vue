@@ -82,6 +82,18 @@ function clickIcon(name:RoutesNamesType){
           消息中心
         </view>
       </view>
+      <view class="text-center" @click="clickIcon('aboutMe')">
+        <nx-image
+          src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/aboutme.png"
+          width="48rpx"
+          height="48rpx"
+        />
+        <view class="text-titleSmall text-center">
+          关于我们
+        </view>
+      </view>
+      <view class="w-96rpx" />
+      <view class="w-96rpx" />
     </view>
   </view>
 </template>

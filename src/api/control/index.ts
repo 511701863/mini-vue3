@@ -151,3 +151,26 @@ export function controlSunroof<P = any>(data: P) {
     }
   });
 }
+//座椅加热
+export function controlHeating<P = any>(data: P) {
+  return post<any>({
+    url: '/tsp-remote-operation/v1/remote-operation/seat/heating',
+    data,
+    loading: false,
+    checkPin:true,
+    header: {
+    }
+  });
+}
+//座椅通风
+export function controlVentilation<P = any>(data: P) {
+  return post<any>({
+    url: '/tsp-remote-operation/v1/remote-operation/seat/ventilation',
+    data,
+    loading: false,
+    checkPin:true,
+    header: {
+    }
+  });
+}
+

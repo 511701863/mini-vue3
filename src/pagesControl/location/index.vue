@@ -4,24 +4,35 @@ import { onLoad } from '@dcloudio/uni-app';
 
 import nxImage from '@/components/nxImage/nxImage.vue';
 import ControlDiaLog from './components/ControlDiaLog.vue';
+import PinInput from '@/components/pinInput/myp-one.vue';
 
 import type { TextData, Path, markersData } from './type';
 
-import qqmapsdk from '@/utils/sdk/qq-map-sdk/index';
+import { findVehicleDefault } from '../../api/control/index';
 import dayjs from 'dayjs';
 import { sendToCar, getCarLocation } from '@/api/control/location';
 import { uniqueFunc, getDistance } from '@/utils/tool/index';
 import AMap from '../../common/amap-wx.130.js';
 import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
+import { useConfig } from '@/store/modules/config';
+
+const { setPin, config } = useConfig();
 
 const { run: getCarLocationFn, data } = useRequest<Control.VehicleLocationAo>(getCarLocation, {
   manual: true,
   onSuccess: () => {
     const params: any = data.value;
+    //没有车位置的情况
     if (data.value?.longitude === 0 || data.value?.latitude === 0) {
       latitude.value = uni.getStorageSync('latitude');
       longitude.value = uni.getStorageSync('longitude');
+      state.chosen = {
+        address: uni.getStorageSync('address'),
+        name: uni.getStorageSync('addName'),
+        latitude: uni.getStorageSync('latitude'),
+        longitude: uni.getStorageSync('longitude')
+      };
       createMarker([]);
       return;
     }
@@ -56,6 +67,9 @@ const { run: sendToCarFn } = useRequest(sendToCar, {
     });
   }
 });
+const { run: findVehicleDefaultFn, data:carDetail } = useRequest(findVehicleDefault, {
+  manual: false
+});
 let myAmapFun = new AMap.AMapWX({ key: 'cf893f474862b6533054310120072d17' });
 const latitude = ref(uni.getStorageSync('latitude'));
 const longitude = ref(uni.getStorageSync('longitude'));
@@ -75,7 +89,11 @@ onLoad((query) => {
 const router = useRouter();
 
 function makertap(e: any) {
-  console.log(state.markers[e.markerId]);
+  //没有车辆的情况
+  if (state.markers.length === 2 && e.markerId === 2) {
+    state.chosen = state.markers[1];
+    return;
+  }
   state.chosen = state.markers[e.markerId];
 }
 function createMarker(data: any) {
@@ -83,15 +101,15 @@ function createMarker(data: any) {
     id: 0,
     width: '122rpx',
     height: '134rpx',
-    iconPath: uni.getStorageSync('userInfo').headPortrait || 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/self.png',
+    iconPath: 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/self.png',
     address: uni.getStorageSync('address'),
     name: uni.getStorageSync('addName'),
     latitude: uni.getStorageSync('latitude'),
     longitude: uni.getStorageSync('longitude')
   }];
   if (data.length) {
-    data[0].iconPath = 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/carTop.png'; //如：..­/..­/img/marker_checked.png
-    data[0].width = '48rpx';
+    data[0].iconPath = 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/lCar.png'; //如：..­/..­/img/marker_checked.png
+    data[0].width = '80rpx';
     data[0].height = '96rpx';
     data[0].id = 1;
     markerList.push(data[0]);
@@ -322,7 +340,7 @@ watch(searchInput, (n) => {
           </div>
         </div>
         <div class="flex flex-between">
-          <button class="button-white w-320rpx" @click="isShow = true">
+          <button class="button-white w-320rpx" @click="setPin(true, 0, ()=>{isShow=true})">
             寻车
           </button>
           <button class="button-primary w-320rpx" @click="openEnjoy">
@@ -343,15 +361,18 @@ watch(searchInput, (n) => {
               {{ state.chosen.address }}
             </div>
           </div>
-          <nx-image
-            src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/enjoy.png"
-            width="72rpx"
-            height="72rpx"
-          />
+          <div @click="openEnjoy">
+            <nx-image
+              src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/enjoy.png"
+              width="72rpx"
+              height="72rpx"
+            />
+          </div>
         </div>
       </div>
     </div>
-    <ControlDiaLog v-model="isShow" />
+    <PinInput type="box" />
+    <ControlDiaLog v-model="isShow" :car-info="carDetail" :btn-id="2" />
   </div>
 </template>
 <style scoped lang="scss">

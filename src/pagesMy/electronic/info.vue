@@ -105,7 +105,7 @@ function submit() {
         />
         <nx-select
           v-model="state.formData.vin"
-          :options="carList?.map(item => { return { name: item.carLicense, value: item.vin } }) || []"
+          :options="carList?.filter(item => item.authState===3 && !item.isGrant).map(item => { return { name: item.carLicense, value: item.vin } }) || []"
           label="监控车辆"
           placeholder="请选择监控车辆"
         />

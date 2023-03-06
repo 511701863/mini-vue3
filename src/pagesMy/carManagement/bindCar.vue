@@ -14,12 +14,13 @@ const formData:Record<string, any> = reactive({
   engineNumber:'',
   vin:''
 });
+const scanVin:Ref<string> = ref('');
 const { run:judgeVehicleUserByVinFn, data:carStatus } = useRequest(judgeVehicleUserByVin, {
   manual: true,
   onSuccess: () => {
-    if(carStatus){
+    if(!carStatus.value){
       if(activeNames.value === '1'){
-        findVehicleInfoByScanFn(formData);
+        findVehicleInfoByScanFn({vin:scanVin.value});
       }else{
         findVehicleInfoFn(formData);
       }
@@ -52,7 +53,8 @@ function onChange(event:any){
 function scanCode(){
   uni.scanCode({
   success (res) {
-    console.log(res);
+    scanVin.value = res.result;
+    judgeVehicleUserByVinFn({vin:scanVin.value.slice(0, 17)});
   }
 });
 }

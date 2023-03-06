@@ -112,7 +112,7 @@ const { run: collectionFnLeft, data: abilityListLeft } = useRequest<Control.Abil
     btnList.value = btnSource.filter((item) => {
       if (item.checkCode) {
         if (item.checkCode === 'srfOperateSts' || item.checkCode === 'windowSts') {
-          item.check = props.carInfo?.vehicleCondition?.[item.checkCode] === 1;
+          item.check = [1, 2].includes(props.carInfo?.vehicleCondition?.[item.checkCode] || 0);
         } else {
           item.check = props.carInfo?.vehicleCondition?.[item.checkCode];
         }
@@ -122,7 +122,11 @@ const { run: collectionFnLeft, data: abilityListLeft } = useRequest<Control.Abil
     });
     airList.value = airSource.map((item) => {
       if (item.checkCode) {
-        item.check = props.carInfo?.vehicleCondition?.[item.checkCode];
+        if(props.carInfo?.vehicleCondition?.engineSts && props.carInfo?.vehicleCondition?.acWorkingSts){
+          item.check = props.carInfo?.vehicleCondition?.[item.checkCode];
+        }else{
+          item.check = false;
+        }
       }
       return item;
     });
@@ -222,6 +226,12 @@ function goToAir() {
             >
               <span class="text-72rpx">--</span>
             </div>
+            <div v-else-if="+props.carInfo?.vehicleCondition?.acTemp === 32.5">
+              <span class="text-72rpx">Hi</span>
+            </div>
+            <div v-else-if="+props.carInfo?.vehicleCondition?.acTemp === 17.5">
+              <span class="text-72rpx">LO</span>
+            </div>
             <div v-else>
               <span class="text-72rpx">{{ props.carInfo?.vehicleCondition?.acTemp?.split('.')[0] }}</span><span
                 v-if="props.carInfo?.vehicleCondition?.acTemp?.indexOf('.') > -1"
@@ -235,8 +245,14 @@ function goToAir() {
             >
               <span class="text-72rpx">--</span>
             </div>
+            <div v-else-if="props.carInfo?.vehicleCondition?.acGear === '16档温度'">
+              <span class="text-72rpx">Hi</span>
+            </div>
+            <div v-else-if="props.carInfo?.vehicleCondition?.acGear === '1档温度'">
+              <span class="text-72rpx">LO</span>
+            </div>
             <div v-else>
-              <span class="text-72rpx">{{ props.carInfo?.vehicleCondition?.acGear }}</span><span>档</span>
+              <span class="text-72rpx">{{ props.carInfo?.vehicleCondition?.acGear.slice(0,props.carInfo?.vehicleCondition?.acGear.length === 4?1:2) }}</span><span>档</span>
             </div>
           </div>
           <div class="text-medium mt-mini">

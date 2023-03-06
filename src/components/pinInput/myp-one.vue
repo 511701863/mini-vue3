@@ -130,6 +130,10 @@ function clear() {
 function closeDialog() {
   setPin(false);
 }
+function forgetPin(){
+  setPin(false);
+  router.navigateTo({name:'pinConfigForgetPin'});
+}
 </script>
 <template>
   <van-dialog use-slot :show-confirm-button="false" :show="modelShow" @close="closeDialog">
@@ -173,7 +177,7 @@ function closeDialog() {
       </view>
       <view class="flex justify-between">
         <div></div>
-        <div class="text-warn pt-32rpx p-x-24rpx" @click="closeDialog">
+        <div class="text-warn pt-32rpx p-x-24rpx" @click="forgetPin">
           忘记PIN码？
         </div>
       </view>

@@ -10,40 +10,55 @@ import { useRouter } from '@/router/router';
 import { useRequest } from '../../hooks/useRequest/useRequst';
 import { useStore } from '../../store/modules/store';
 
-const {setStore} = useStore();
+const { setStore } = useStore();
 const router = useRouter();
-const scrollViewRef:any = ref(null);
+const scrollViewRef: any = ref(null);
 const params = reactive({
-  provinceCode:uni.getStorageSync('provinceCode'),
-  province:uni.getStorageSync('province'),
-  pageSize:10,
-  name:''
+  provinceCode: '',
+  province: '',
+  pageSize: 10,
+  longitude: '',
+  latitude: '',
+  name: ''
 });
-const citySelectShow =ref(false);
+const citySelectShow = ref(false);
 
-const {data:cityData} = useRequest<MyCenter.AreaVo[]>(getProvinceList, {
-  manual:false
+const { data: cityData } = useRequest<MyCenter.AreaVo[]>(getProvinceList, {
+  manual: false
 });
 
-function choseCity(){
-  citySelectShow.value=true;
+function choseCity() {
+  citySelectShow.value = true;
 }
-function confirmCity(value:any){
-  citySelectShow.value=false;
+function confirmCity(value: any) {
+  citySelectShow.value = false;
   params.provinceCode = value.detail.value;
   params.province = value.detail.name;
   scrollViewRef.value.search();
 }
-function choseStore(item:any){
+function choseStore(item: any) {
   setStore(item);
   router.navigateBack({});
 }
-function changeInput(){
+function changeInput() {
   scrollViewRef.value.search();
+}
+function call(phone:any) {
+  uni.makePhoneCall({
+    phoneNumber: phone,
+    success: function () {
+      console.log('拨打电话成功');
+    },
+    fail() {
+      console.log('打电话失败了');
+    }
+  });
 }
 onLoad(() => {
   params.province = uni.getStorageSync('province');
   params.provinceCode = uni.getStorageSync('provinceCode');
+  params.longitude = uni.getStorageSync('longitude');
+  params.latitude = uni.getStorageSync('latitude');
 });
 </script>
 
@@ -66,35 +81,37 @@ onLoad(() => {
     </div>
     <nxScrollView ref="scrollViewRef" :cb-fn="getStoreList" :header-height="64" :params="params">
       <template #list="{ list }">
-        <div class="lh-108rpx bg-pageBg p-x-32rpx">
+        <div class="bg-pageBg p-32rpx p-b-16rpx">
           全部4S店
         </div>
-        <div v-for="(item,index) in list as MyCenter.DealersAppPageResultAo[]" :key="index">
-          <div class="w-100vw bg-white p-32rpx box-border" @click="choseStore(item)">
-            <div class="flex justify-between items-center">
-              <div class="font-bold flex-1">
-                {{ item.name }}
-              </div>
-              <div class="text-gray text-titleMedium flex">
-                {{ item.hotPhone }}
+        <div v-for="(item, index) in list as MyCenter.DealersAppPageResultAo[]" :key="index" class="bg-pageBg p-y-16rpx p-x-32rpx">
+          <div class="w-686rpx rounded-16rpx bg-white p-32rpx box-border" @click="choseStore(item)">
+            <div class="font-bold">
+              {{ item.name }}
+            </div>
+            <div class="text-gray mt-24rpx text-titleSmall flex items-center">
+              {{ item.address }}
+            </div>
+            <div class="flex mt-32rpx">
+              <div class="text-small flex" @click.stop="call(item.hotPhone)">
                 <nx-image
                   src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/phone.png"
-                  class="ml-8rpx"
+                  class="mr-8rpx mt-2rpx"
                   width="24rpx"
                   height="24rpx"
                 />
+                {{ item.hotPhone }}
+              </div>
+              <div class="ml-72rpx text-small flex">
+                <nx-image
+                  src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/distributor.png"
+                  class="mr-8rpx  mt-2rpx"
+                  width="24rpx"
+                  height="24rpx"
+                />
+                距离{{ item?.distance }}km
               </div>
             </div>
-            <div class="text-gray mt-24rpx text-titleMedium flex items-center">
-              <nx-image
-                src="https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/position.png"
-                class="mr-8rpx"
-                width="24rpx"
-                height="24rpx"
-              />
-              {{ item.address }}
-            </div>
-            <div></div>
           </div>
         </div>
       </template>
@@ -102,18 +119,17 @@ onLoad(() => {
     <van-action-sheet
       title="请选择所在地区"
       :show="citySelectShow"
-      :actions="cityData?.map(item=>{
+      :actions="cityData?.map(item => {
         return {
-          value:item.areaId,
-          name:item.shortName
+          value: item.areaId,
+          name: item.shortName
         }
       })"
       close-on-click-overlay
       close-on-click-action
       @select="confirmCity"
-      @close="citySelectShow=false"
+      @close="citySelectShow = false"
     />
   </div>
 </template>
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

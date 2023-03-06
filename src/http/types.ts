@@ -8,6 +8,7 @@ export interface RequestOptions {
   loadingText?:string,
   loadingMask?:boolean,
   checkPin?:boolean
+  customErr?:boolean
 }
 
 export interface ResponseData<T> {

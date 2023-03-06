@@ -3,28 +3,34 @@ import nxInput from '@/components/nxInput/nxInput.vue';
 
 import { useRouter } from '@/router/router';
 import { onMounted, ref, reactive, watchEffect, watch, isRef, computed, useAttrs } from 'vue';
+import { getMaintenanceCancel } from '@/api/my/maintenance';
 import { useRequest } from '@/hooks/useRequest/useRequst';
-import { getList, getList2, pushMsg } from '@/api/car/index';
-import { debounce } from '@/utils/tool/index';
 
 type ControlDialogProps = {
   modelValue: boolean,
   type?: string,
+  appointNo?:string | null
 }
+const { run: getMaintenanceCancelFn, data: mainDetail } = useRequest<MyCenter.MaintenanceAppointmentDetailAo>(getMaintenanceCancel, {
+  manual: true,
+  onSuccess:() => {
+    console.log(mainDetail);
 
-const attrs = useAttrs();
-const router = useRouter();
+  }
+});
 const props = withDefaults(defineProps<ControlDialogProps>(), {
   modelValue: false,
   type: ''
 });
 const cancelReason =ref('');
-const emit = defineEmits<{(evt: 'update:modelValue', value: boolean): void
+const emit = defineEmits<{(evt: 'update:modelValue', value: boolean): void,
+(evt: 'cancel'): void
 }>();
-const state = reactive<{ data:any}>({
-  data: {}
-});
 
+function confirm(){
+  getMaintenanceCancelFn({appointNo:props.appointNo, cancelReason:cancelReason.value});
+  emit('cancel');
+}
 // function onSuccess(res:any) {
 //   emit('update:modelValue', false);
 // }
@@ -40,15 +46,17 @@ const state = reactive<{ data:any}>({
     use-slot
     :show="props.modelValue"
     show-cancel-button
+    :show-confirm-button="cancelReason"
     @cancel="emit('update:modelValue', false);"
     @close="emit('update:modelValue', false);"
+    @confirm="confirm"
   >
     <view class="p-40rpx rounded-16rpx">
       <div class="text-center pb-48rpx font-bold">
         是否取消
       </div>
       <div class="text-center pb-32rpx text-gray">
-        尊敬的车主，维保订单一经删除将无法再检索查看，请确认是否删除？
+        尊敬的车主，维保订单一经取消将不再生效，请确认是否取消？
       </div>
       <view class="code-box">
         <nxInput

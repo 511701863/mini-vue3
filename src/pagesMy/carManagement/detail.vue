@@ -83,7 +83,7 @@ function changeWarning() {
 
 <template>
   <div class="relative bg-pageBg h-100vh p-32rpx box-border">
-    <div class="mt-180rpx relative w-686rpx bg-white mb-32rpx rounded-16rpx p-32rpx box-border">
+    <div class="mt-165rpx relative w-686rpx bg-white mb-32rpx rounded-16rpx p-32rpx box-border">
       <div class="flex flex-wrap justify-center items-center">
         <div class="flex mt-123rpx">
           <div
@@ -144,9 +144,9 @@ function changeWarning() {
           </div>
         </div>
       </div>
-      <div class="absolute top--132rpx right-45rpx">
+      <div class="absolute top--132rpx right-95rpx">
         <image
-          class="w-600rpx h-258rpx"
+          class="w-480rpx h-245rpx"
           :src="carData?.modelImage"
         />
       </div>
