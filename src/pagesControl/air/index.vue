@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, reactive } from 'vue';
+import { onMounted, ref, reactive, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 
 import nxImage from '@/components/nxImage/nxImage.vue';
@@ -39,6 +39,7 @@ const { run: collectionFnLeft, data: abilityListLeft } = useRequest<Control.Abil
         acTemp.value = carInfo?.value?.vehicleCondition?.acTemp ? +carInfo.value.vehicleCondition.acTemp : '';
         airIndex.value = airLevel.value.findIndex((item) => item.value === acTemp.value);
       } else {
+        acTemp.value = '';
         airIndex.value = 0;
       }
     } else {
@@ -47,6 +48,7 @@ const { run: collectionFnLeft, data: abilityListLeft } = useRequest<Control.Abil
         acGear.value = carInfo.value.vehicleCondition.acGear.substring(0, carInfo.value.vehicleCondition.acGear.indexOf('档'));
         airIndex.value = airGrade.value.findIndex((item) => item.value === +acGear.value);
       } else {
+        acGear.value = '';
         airIndex.value = 0;
       }
     }
@@ -114,6 +116,21 @@ const { run: findVehicleDefaultFn, data: carInfo } = useRequest<Control.VehiclLo
   }
 });
 function animationFinishFn(e: any) {
+  if (carInfo.value?.authState !== 3) {
+    uni.showModal({
+      title: '提示',
+      content: `当前默认车辆“${carInfo.value?.vin}”还未进行实名认证，请前往APP认证`,
+      showCancel: false,
+      success: function (res) {
+        if (res.confirm) {
+          console.log('用户点击确定');
+        } else if (res.cancel) {
+          console.log('用户点击取消');
+        }
+      }
+    });
+    return;
+  }
   let current = +e.detail.current;
   airIndex.value = current;
   //如果是原来的数值 则不执行
@@ -123,13 +140,16 @@ function animationFinishFn(e: any) {
   } else {
     flag = acGear.value;
   }
-
-  if (current !== 0 && +e.detail.currentItemId !== +flag) {
+  if (+e.detail.currentItemId !== +flag) {
     if (timer.value) {
       clearInterval(timer.value);
       timer.value = null;
     }
     timer.value = setTimeout(() => {
+      if (current === 0) {
+        setPin(true, 0, controlAirFn, { vin: carInfo.value?.vin, destStatus: 'OFF' });
+        return;
+      }
       if (hasCollecList.value.includes('acControl')) {
         const params = { vin: carInfo.value?.vin, temperature: +e.detail.currentItemId, destStatus: 'ON' };
         setPin(true, 0, controlAirFn, params);
@@ -138,10 +158,6 @@ function animationFinishFn(e: any) {
         setPin(true, 0, controlAirFn, params);
       }
     }, 2000);
-  }
-  if (current === 0) {
-    clearInterval(timer.value);
-    timer.value = null;
   }
 }
 //空调
@@ -154,12 +170,30 @@ const timer: any = ref(null);
 function changeAirSwiper(e: any) {
   console.log(1);
 }
-function transitionSwiper(){
+function transitionSwiper() {
   clearInterval(timer.value);
   timer.value = null;
 }
 function clickControl(item: controlItem) {
+  if (carInfo.value?.authState !== 3) {
+    uni.showModal({
+      title: '提示',
+      content: `当前默认车辆“${carInfo.value?.vin}”还未进行实名认证，请前往APP认证`,
+      showCancel: false,
+      success: function (res) {
+        if (res.confirm) {
+          console.log('用户点击确定');
+        } else if (res.cancel) {
+          console.log('用户点击取消');
+        }
+      }
+    });
+    return;
+  }
   switch (item.id) {
+    case 5:
+      controlAirFn({ vin: carInfo.value?.vin, destStatus: 'OFF' });
+      break;
     case 7:
       if (hasCollecList.value.includes('acControl')) {
         controlAirFn({ vin: carInfo.value?.vin, temperature: 31.5, destStatus: 'ON' });
@@ -180,17 +214,17 @@ function clickControl(item: controlItem) {
     case 10:
       controlAirFn({ vin: carInfo.value?.vin, cleanAir: !item.check, destStatus: 'ON' });
       break;
-      case 11:
-      controlHeatingFn({ vin: carInfo.value?.vin, destLevel: item.check?'LEVEL0':'LEVEL3', destSeat: 'LF' });
+    case 11:
+      controlHeatingFn({ vin: carInfo.value?.vin, destLevel: item.check ? 'LEVEL0' : 'LEVEL3', destSeat: 'LF' });
       break;
-      case 12:
-      controlHeatingFn({ vin: carInfo.value?.vin, destLevel: item.check?'LEVEL0':'LEVEL3', destSeat: 'RF' });
+    case 12:
+      controlHeatingFn({ vin: carInfo.value?.vin, destLevel: item.check ? 'LEVEL0' : 'LEVEL3', destSeat: 'RF' });
       break;
-      case 13:
-      controlVentilationFn({ vin: carInfo.value?.vin, destLevel: item.check?'LEVEL0':'LEVEL3', destSeat: 'LF' });
+    case 13:
+      controlVentilationFn({ vin: carInfo.value?.vin, destLevel: item.check ? 'LEVEL0' : 'LEVEL3', destSeat: 'LF' });
       break;
-      case 14:
-      controlVentilationFn({ vin: carInfo.value?.vin, destLevel: item.check?'LEVEL0':'LEVEL3', destSeat: 'RF' });
+    case 14:
+      controlVentilationFn({ vin: carInfo.value?.vin, destLevel: item.check ? 'LEVEL0' : 'LEVEL3', destSeat: 'RF' });
       break;
     default:
       console.log('无');
@@ -277,7 +311,13 @@ function clickControl(item: controlItem) {
             </div>
           </div>
           <div>
-            <van-button round type="default" size="large">
+            <van-button
+              :disabled="!carInfo?.vehicleCondition?.engineSts || !carInfo?.vehicleCondition?.acWorkingSts"
+              round
+              type="default"
+              size="large"
+              @click="setPin(true, 0, clickControl, { id: 5 })"
+            >
               关闭空调
             </van-button>
           </div>
@@ -300,8 +340,8 @@ function clickControl(item: controlItem) {
                 </p>
                 <img
                   class="set-img-top absolute top-68rpx left-49rpx"
-                  :src="carInfo?.vehicleCondition?.['lfSeatHeatSts'] ?'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_11_s.png':'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_11.png'"
-                  @click="setPin(true, 0, clickControl, {id:11,check:carInfo?.vehicleCondition?.['lfSeatHeatSts']})"
+                  :src="carInfo?.vehicleCondition?.['lfSeatHeatSts'] ? 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_11_s.png' : 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_11.png'"
+                  @click="setPin(true, 0, clickControl, { id: 11, check: carInfo?.vehicleCondition?.['lfSeatHeatSts'] })"
                 >
                 <img
                   class="set-img"
@@ -314,8 +354,8 @@ function clickControl(item: controlItem) {
                 </p>
                 <img
                   class="set-img-top absolute top-68rpx left-49rpx"
-                  :src="carInfo?.vehicleCondition?.['rfSeatHeatSts'] ?'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_12_s.png':'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_12.png'"
-                  @click="setPin(true, 0, clickControl, {id:12,check:carInfo?.vehicleCondition?.['rfSeatHeatSts']})"
+                  :src="carInfo?.vehicleCondition?.['rfSeatHeatSts'] ? 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_12_s.png' : 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_12.png'"
+                  @click="setPin(true, 0, clickControl, { id: 12, check: carInfo?.vehicleCondition?.['rfSeatHeatSts'] })"
                 >
                 <img
                   class="set-img"
@@ -330,8 +370,8 @@ function clickControl(item: controlItem) {
                 </p>
                 <img
                   class="set-img-top absolute top-68rpx left-49rpx"
-                  :src="carInfo?.vehicleCondition?.['lfSeatVentilateSts'] ?'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_13_s.png':'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_13.png'"
-                  @click="setPin(true, 0, clickControl, {id:13,check:carInfo?.vehicleCondition?.['lfSeatVentilateSts']})"
+                  :src="carInfo?.vehicleCondition?.['lfSeatVentilateSts'] ? 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_13_s.png' : 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_13.png'"
+                  @click="setPin(true, 0, clickControl, { id: 13, check: carInfo?.vehicleCondition?.['lfSeatVentilateSts'] })"
                 >
                 <img
                   class="set-img"
@@ -344,8 +384,8 @@ function clickControl(item: controlItem) {
                 </p>
                 <img
                   class="set-img-top absolute top-68rpx left-49rpx"
-                  :src="carInfo?.vehicleCondition?.['rfSeatVentilateSts'] ?'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_14_s.png':'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_14.png'"
-                  @click="setPin(true, 0, clickControl, {id:14,check:carInfo?.vehicleCondition?.['rfSeatVentilateSts']})"
+                  :src="carInfo?.vehicleCondition?.['rfSeatVentilateSts'] ? 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_14_s.png' : 'https://imgs-test-1308146855.cos.ap-shanghai.myqcloud.com/car/home_icon_1_14.png'"
+                  @click="setPin(true, 0, clickControl, { id: 14, check: carInfo?.vehicleCondition?.['rfSeatVentilateSts'] })"
                 >
                 <img
                   class="set-img"

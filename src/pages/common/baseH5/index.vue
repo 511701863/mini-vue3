@@ -22,17 +22,17 @@ const onMessage = (e: any) => {
     isHelp = true;
   }
 };
-onShareAppMessage((shareOpt) => {
-  console.log('分享', shareOpt);
-  const promise = new Promise((resolve, rej) => {
-    console.log(111);
-  });
-  return {
-    promise,
-    title: '快来和我一起参与活动吧',
-    path: `/pagesFind/activity/activityCommonDetail?activityId=${activityId.value}&shareUserId=${userId}`
-  };
-});
+// onShareAppMessage((shareOpt) => {
+//   console.log('分享', shareOpt);
+//   const promise = new Promise((resolve, rej) => {
+//     console.log(111);
+//   });
+//   return {
+//     promise,
+//     title: '快来和我一起参与活动吧',
+//     path: `/pagesFind/activity/activityCommonDetail?activityId=${activityId.value}&shareUserId=${userId}`
+//   };
+// });
 onLoad((e: any) => {
   const { path, ...query } = e;
   src.value = getBaseH5() + path + '?';

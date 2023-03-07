@@ -137,6 +137,7 @@ function changeWarning() {
           </div>
           <div>
             <van-switch
+              :disabled="carData?.authState !== 3"
               :checked="carData?.isTheftAlarm"
               active-color="#00C682"
               @change="setPin(true, 0, changeWarning())"

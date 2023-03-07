@@ -105,7 +105,7 @@ const isNextDay =computed(() => {
             {{ props?.info?.alarmType === 'all' ? '驶入，驶出' :props?.info?.alarmType === 'ENTRY'?'驶入':'驶出' }}
           </div>
         </div>
-        <div class="flex justify-between p-t-32rpx">
+        <div class="flex justify-between p-y-32rpx">
           <button
             class="bg-white w-320rpx h-100rpx text-32rpx lh-100rpx rounded-50rpx text-buttonColor border-buttonColor border-1rpx"
             @click="deleteFn"

@@ -42,7 +42,7 @@ export function useCheckRes<T, P extends any[] = any[]>(
       querise[defaultQuerise].status = checkData.value?.operationStatus as string;
       querise[defaultQuerise].data = checkData.value;
       //失败或者超时停止指令 清除定时器 或轮询超过20次
-      if (['TIMEOUT'].includes(checkData.value?.operationStatus || '') || timerNum.value >= 40) {
+      if (['TIMEOUT'].includes(checkData.value?.operationStatus || '') || timerNum.value >= 20) {
         clearInterval(timer.value);
         timer.value = null;
         checkSuccess(params);

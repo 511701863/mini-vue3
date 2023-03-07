@@ -8,6 +8,7 @@ import PinInput from '@/components/pinInput/myp-one.vue';
 
 import type { TextData, Path, markersData } from './type';
 
+import qqmapsdk from '@/utils/sdk/qq-map-sdk/index';
 import { findVehicleDefault } from '../../api/control/index';
 import dayjs from 'dayjs';
 import { sendToCar, getCarLocation } from '@/api/control/location';
@@ -48,8 +49,10 @@ const { run: getCarLocationFn, data } = useRequest<Control.VehicleLocationAo>(ge
           let mapCtx = wx.createMapContext('myMap');
           mapCtx.moveToLocation({ latitude: params.latitude, longitude: params.longitude });
         });
+        console.log(res[0].regeocodeData.addressComponent.building?.name);
+
         //车辆所在地信息
-        params.name = res[0].regeocodeData.addressComponent.building?.name ?? '';
+        params.name = Array.isArray(res[0].regeocodeData.addressComponent.building?.name) ? res[0].regeocodeData.addressComponent.township : res[0].regeocodeData.addressComponent.building?.name;
         params.address = res[0].regeocodeData.formatted_address ?? '';
         params.distance = getDistance(uni.getStorageSync('latitude'), uni.getStorageSync('longitude'), params.latitude, params.longitude);
         state.chosen = params;
@@ -67,7 +70,7 @@ const { run: sendToCarFn } = useRequest(sendToCar, {
     });
   }
 });
-const { run: findVehicleDefaultFn, data:carDetail } = useRequest(findVehicleDefault, {
+const { run: findVehicleDefaultFn, data: carDetail } = useRequest(findVehicleDefault, {
   manual: false
 });
 let myAmapFun = new AMap.AMapWX({ key: 'cf893f474862b6533054310120072d17' });
@@ -82,11 +85,41 @@ const state = reactive({
 });
 const carVin: any = ref('');
 onLoad((query) => {
-  const { vin } = query;
-  carVin.value = vin;
-  getCarLocationFn({ vin });
+  uni.getLocation({
+    type: 'gcj02',
+    success: (res) => {
+      uni.setStorageSync('longitude', res.longitude);
+      uni.setStorageSync('latitude', res.latitude);
+      qqmapsdk.reverseGeocoder({
+        location: {
+          latitude: res.latitude,
+          longitude: res.longitude
+        },
+        success: function (res: any) {
+          uni.setStorageSync('city', res.result.ad_info.city);
+          uni.setStorageSync('addName', res.result.formatted_addresses.recommend);
+          uni.setStorageSync('provinceCode', res.result.ad_info.adcode.slice(0, 3) + '000');
+          uni.setStorageSync('province', res.result.ad_info.province);
+          uni.setStorageSync('findCity', res.result.ad_info.city);
+          uni.setStorageSync('address', res.result.address);
+          const { vin } = query;
+          carVin.value = vin;
+          getCarLocationFn({ vin });
+        },
+        fail: function (error: any) {
+          console.error(error);
+        }
+      });
+    },
+    fail() {
+      uni.showToast({
+        title: '位置获取失败',
+        icon: 'error',
+        duration: 2000
+      });
+    }
+  });
 });
-const router = useRouter();
 
 function makertap(e: any) {
   //没有车辆的情况
@@ -118,9 +151,41 @@ function createMarker(data: any) {
   console.log(state.markers);
 }
 function restMap() {
-  getCarLocationFn({ vin: carVin.value });
-  let mapCtx = wx.createMapContext('myMap');
-  mapCtx.moveToLocation();
+  uni.getLocation({
+    type: 'gcj02',
+    success: (res) => {
+      uni.setStorageSync('longitude', res.longitude);
+      uni.setStorageSync('latitude', res.latitude);
+      qqmapsdk.reverseGeocoder({
+        location: {
+          latitude: res.latitude,
+          longitude: res.longitude
+        },
+        success: function (res: any) {
+          uni.setStorageSync('city', res.result.ad_info.city);
+          uni.setStorageSync('addName', res.result.formatted_addresses.recommend);
+          uni.setStorageSync('provinceCode', res.result.ad_info.adcode.slice(0, 3) + '000');
+          uni.setStorageSync('province', res.result.ad_info.province);
+          uni.setStorageSync('findCity', res.result.ad_info.city);
+          uni.setStorageSync('address', res.result.address);
+          getCarLocationFn({ vin: carVin.value });
+          let mapCtx = wx.createMapContext('myMap');
+          mapCtx.moveToLocation();
+        },
+        fail: function (error: any) {
+          console.error(error);
+        }
+      });
+    },
+    fail() {
+      uni.showToast({
+        title: '位置获取失败',
+        icon: 'error',
+        duration: 2000
+      });
+    }
+  });
+
 }
 function send() {
   sendToCarFn({
@@ -340,7 +405,7 @@ watch(searchInput, (n) => {
           </div>
         </div>
         <div class="flex flex-between">
-          <button class="button-white w-320rpx" @click="setPin(true, 0, ()=>{isShow=true})">
+          <button class="button-white w-320rpx" @click="setPin(true, 0, () => { isShow = true })">
             寻车
           </button>
           <button class="button-primary w-320rpx" @click="openEnjoy">

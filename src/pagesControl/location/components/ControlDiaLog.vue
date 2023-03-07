@@ -48,26 +48,6 @@ const btnList = reactive<Record<string | number, controlItem[]>>({
   }
   ]
 });
-watch(() => props.carInfo, (nVal) => {
-  if (nVal?.vin) {
-    //天窗
-    btnList[6].forEach((item) => { item.check = false; });
-    if (props.carInfo?.vehicleCondition?.srfOperateSts === 1) {
-      btnList[6][0].check = true;
-    } else if (props.carInfo?.vehicleCondition?.srfOperateSts === 2) {
-      btnList[6][1].check = true;
-
-    }
-    //车窗
-    btnList[5].forEach((item) => { item.check = false; });
-    if (props.carInfo?.vehicleCondition?.windowSts === 1) {
-      btnList[5][0].check = true;
-    } else if (props.carInfo?.vehicleCondition?.windowSts === 2) {
-      btnList[5][1].check = true;
-
-    }
-  }
-}, { deep: true, immediate:true});
 
 function successControl() {
   emit('controlSuccess');
@@ -78,6 +58,21 @@ const { run: controlLightFn } = useCheckRes(controlLight, successControl);
 const { run: controlAlarmFn } = useCheckRes(controlAlarm, successControl);
 
 function clickControl(item: controlItem) {
+  if (props.carInfo.authState !== 3) {
+    uni.showModal({
+      title: '提示',
+      content: `当前默认车辆“${props.carInfo.vin}”还未进行实名认证，请前往APP认证`,
+      showCancel: false,
+      success: function (res) {
+        if (res.confirm) {
+          console.log('用户点击确定');
+        } else if (res.cancel) {
+          console.log('用户点击取消');
+        }
+      }
+    });
+    return;
+  }
   //车窗天窗打开的就不继续
   if([4, 5, 7, 8].includes(item.id?+item.id : 4) && item.check){
     return;

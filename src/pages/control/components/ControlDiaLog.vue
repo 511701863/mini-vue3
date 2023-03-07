@@ -126,6 +126,21 @@ const { run: controlWindowFn } = useCheckRes(controlWindow, successControl);
 const { run: controlSunroofFn } = useCheckRes(controlSunroof, successControl);
 
 function clickControl(item: controlItem) {
+  if (props.carInfo.authState !== 3) {
+    uni.showModal({
+      title: '提示',
+      content: `当前默认车辆“${props.carInfo.vin}”还未进行实名认证，请前往APP认证`,
+      showCancel: false,
+      success: function (res) {
+        if (res.confirm) {
+          console.log('用户点击确定');
+        } else if (res.cancel) {
+          console.log('用户点击取消');
+        }
+      }
+    });
+    return;
+  }
   //车窗天窗打开的就不继续
   if([4, 5, 7, 8].includes(item.id?+item.id : 4) && item.check){
     return;

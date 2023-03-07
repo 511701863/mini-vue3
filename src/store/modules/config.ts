@@ -8,7 +8,7 @@ const { logout } = useUser();
 export const useConfig = defineStore('config', () => {
   const config: AppConfig = reactive({
     baseURL: 'https://fdt-gateway-customer-tspstaging.dm.newcowin.com',
-    baseH5: 'https://community-webapp-staging.newtsp.newcowin.com/#/community/agreement',
+    baseH5: 'https://tsp-community-webapp.kayyi.com/#/community/agreement',
     ENV: 'dev',
     etcAppid: '',
     timer: null,
@@ -24,7 +24,7 @@ export const useConfig = defineStore('config', () => {
   const envConfig = {
     'dev': {
       url: 'https://fdt-gateway-customer-tspstaging.dm.newcowin.com',
-      h5Url: 'https://community-webapp-staging.newtsp.newcowin.com/#/community/agreement',
+      h5Url: 'https://tsp-community-webapp.kayyi.com/#/community/agreement',
       ENV: 'dev'
     },
     'prod': {
@@ -34,7 +34,7 @@ export const useConfig = defineStore('config', () => {
     },
     'uat': {
       url: 'https://fdt-gateway-bside-tspstaging.dm.newcowin.com',
-      h5Url: 'https://community-webapp-staging.newtsp.newcowin.com/#/community/agreement',
+      h5Url: 'https://tsp-community-webapp.kayyi.com/#/community/agreement',
       ENV: 'uat'
     }
   };

@@ -149,6 +149,21 @@ const { run: controlEngineFn } = useCheckRes(controlEngine, successControl);
 const { run: controlAirFn } = useCheckRes(controlAir, successControl);
 
 function clickControl(item: controlItem) {
+  if (props.carInfo.authState !== 3) {
+    uni.showModal({
+      title: '提示',
+      content: `当前默认车辆“${props.carInfo.vin}”还未进行实名认证，请前往APP认证`,
+      showCancel: false,
+      success: function (res) {
+        if (res.confirm) {
+          console.log('用户点击确定');
+        } else if (res.cancel) {
+          console.log('用户点击取消');
+        }
+      }
+    });
+    return;
+  }
   switch (item.id) {
     case 1:
       controlDoorFn({ destDoor: 'ALL', vin: props.carInfo.vin, destStatus: item.check ? 'OFF' : 'ON' });

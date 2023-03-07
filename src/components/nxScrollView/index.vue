@@ -193,7 +193,7 @@ defineExpose({ search });
         <div>
           <div>{{ refreshText }}</div>
           <div class="text-titleSmall">
-            {{ dayjs(Date.now()).format('YYYY-MM-DD hh:mm') }}
+            {{ dayjs(Date.now()).format('YYYY-MM-DD HH:mm') }}
           </div>
         </div>
       </div>
