@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from '@dcloudio/uni-app';
-import qqmapsdk from '@/utils/sdk/qq-map-sdk/index';
+import AMap from '@/common/amap-wx.130.js';
 import { useConfig } from '@/store/modules/config';
 // import { QDinit } from '@/helper/tracker';
 
 // QDinit();
 // login();
+let myAmapFun = new AMap.AMapWX({ key: 'cf893f474862b6533054310120072d17' });
 
 onLaunch(() => {
   console.log('App onLaunch');
@@ -16,18 +17,15 @@ onShow(() => {
     success: (res) => {
       uni.setStorageSync('longitude', res.longitude);
       uni.setStorageSync('latitude', res.latitude);
-      qqmapsdk.reverseGeocoder({
-        location: {
-          latitude: res.latitude,
-          longitude: res.longitude
-        },
+      myAmapFun.getRegeo({
+        location: `${res.longitude},${res.latitude}`,
         success: function (res: any) {
-          uni.setStorageSync('city', res.result.ad_info.city);
-          uni.setStorageSync('addName', res.result.formatted_addresses.recommend);
-          uni.setStorageSync('provinceCode', res.result.ad_info.adcode.slice(0, 3) + '000');
-          uni.setStorageSync('province', res.result.ad_info.province);
-          uni.setStorageSync('findCity', res.result.ad_info.city);
-          uni.setStorageSync('address', res.result.address);
+          uni.setStorageSync('city', res[0].regeocodeData.addressComponent.city);
+          uni.setStorageSync('addName', res[0].desc);
+          uni.setStorageSync('provinceCode', res[0].regeocodeData.addressComponent.adcode.slice(0, 3) + '000');
+          uni.setStorageSync('province', res[0].regeocodeData.addressComponent.province);
+          uni.setStorageSync('findCity', res[0].regeocodeData.addressComponent.city);
+          uni.setStorageSync('address', res[0].regeocodeData.formatted_address);
         },
         fail: function (error: any) {
           console.error(error);

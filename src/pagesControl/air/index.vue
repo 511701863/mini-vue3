@@ -116,21 +116,7 @@ const { run: findVehicleDefaultFn, data: carInfo } = useRequest<Control.VehiclLo
   }
 });
 function animationFinishFn(e: any) {
-  if (carInfo.value?.authState !== 3) {
-    uni.showModal({
-      title: '提示',
-      content: `当前默认车辆“${carInfo.value?.vin}”还未进行实名认证，请前往APP认证`,
-      showCancel: false,
-      success: function (res) {
-        if (res.confirm) {
-          console.log('用户点击确定');
-        } else if (res.cancel) {
-          console.log('用户点击取消');
-        }
-      }
-    });
-    return;
-  }
+
   let current = +e.detail.current;
   airIndex.value = current;
   //如果是原来的数值 则不执行
@@ -146,6 +132,21 @@ function animationFinishFn(e: any) {
       timer.value = null;
     }
     timer.value = setTimeout(() => {
+      if (carInfo.value?.authState !== 3) {
+        uni.showModal({
+          title: '提示',
+          content: `当前默认车辆“${carInfo.value?.vin}”还未进行实名认证，请前往APP认证`,
+          showCancel: false,
+          success: function (res) {
+            if (res.confirm) {
+              console.log('用户点击确定');
+            } else if (res.cancel) {
+              console.log('用户点击取消');
+            }
+          }
+        });
+        return;
+      }
       if (current === 0) {
         setPin(true, 0, controlAirFn, { vin: carInfo.value?.vin, destStatus: 'OFF' });
         return;
