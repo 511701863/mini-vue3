@@ -8,6 +8,13 @@ const obj:any = {
       duration: 2000
     });
   },
+  '12030':function(msg:string) {
+    uni.showToast({
+      title: '账号未注册，请前往凯翼club注册账号',
+      icon: 'none',
+      duration: 3000
+    });
+  },
   '-10014': function(msg:string) {
     uni.showToast({
       title: '登录超时，请重新登录',

@@ -27,7 +27,6 @@ async function bindGetUserInfo(e: any) {
   uni.hideLoading();
   const userRes = await userInfo();
   userState.userInfo = userRes.data;
-  console.log(userState.userInfo);
   uni.setStorageSync('userInfo', userRes.data);
   router.navigateBack({});
 

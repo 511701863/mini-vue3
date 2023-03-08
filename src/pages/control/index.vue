@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, reactive, watchEffect, watch, isRef, computed } from 'vue';
+import { ref } from 'vue';
 import { onHide, onShow } from '@dcloudio/uni-app';
 
 import NoCar from './noCar/index.vue';
@@ -177,7 +177,7 @@ function searchSuccess(value: any) {
     <van-action-sheet
       title="选择车辆"
       :show="carSelectShow"
-      :actions="carList?.map(item => { return { name: (item.carLicense || '无车牌') + (item.defaultFlag ? '（默认车辆）' : ''), value: item.vin, subname: (item.vin + `(${item.isGrant ? '授权车辆' : ''})`) } }) || []"
+      :actions="carList?.map(item => { return { name: (item.carLicense || '无车牌') + (item.defaultFlag ? '（默认车辆）' : ''), value: item.vin, subname: (item.vin + `${item.isGrant ? '(授权车辆)' : ''}`) } }) || []"
       close-on-click-overlay
       close-on-click-action
       @select="confirm"
